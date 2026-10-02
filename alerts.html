@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التنبيهات - WaterFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="dashboard-body">
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div style="display: flex; align-items: center;">
+            <button class="mobile-toggle" aria-label="Toggle Sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <i class="fas fa-water"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>WaterFlow</h1>
+                    <span>نظام إدارة محطات المياه وميكانيكا الموائع</span>
+                </div>
+            </div>
+        </div>
+        <div class="nav-actions">
+            <a href="alerts.html" class="nav-btn" title="التنبيهات">
+                <i class="fas fa-bell"></i>
+                <span class="badge" id="alertBadge">0</span>
+            </a>
+            <div class="user-menu">
+                <div class="user-avatar"></div>
+                <div class="user-info">
+                    <span class="user-name">المستخدم</span>
+                    <span class="user-role">-</span>
+                </div>
+                <i class="fas fa-chevron-down user-arrow"></i>
+                <div class="dropdown-menu">
+                    <a href="settings.html" class="dropdown-item">
+                        <i class="fas fa-cog"></i>
+                        <span>الإعدادات</span>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>تسجيل الخروج</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-gov">
+                <div class="gov-flag-small">
+                    <img src="" alt="Governorate Flag" id="sidebarFlag">
+                </div>
+                <div class="gov-info">
+                    <h3 id="sidebarGovName">-</h3>
+                    <span id="sidebarGovRegion">-</span>
+                </div>
+            </div>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-section"><div class="nav-section-title">الرئيسية</div></li>
+            <li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fas fa-chart-pie"></i><span>لوحة التحكم</span></a></li>
+            <li class="nav-item"><a href="alerts.html" class="nav-link active"><i class="fas fa-bell"></i><span>التنبيهات</span><span class="nav-badge" id="sidebarAlertBadge">0</span></a></li>
+            <li class="nav-section"><div class="nav-section-title">الإدارة والتحليل</div></li>
+            <li class="nav-item"><a href="stations.html" class="nav-link"><i class="fas fa-water"></i><span>المحطات</span></a></li>
+            <li class="nav-item"><a href="fluid-mechanics.html" class="nav-link"><i class="fas fa-calculator"></i><span>ميكانيكا الموائع</span></a></li>
+            <li class="nav-item"><a href="reports.html" class="nav-link"><i class="fas fa-file-alt"></i><span>التقارير</span></a></li>
+            <li class="nav-item"><a href="map.html" class="nav-link"><i class="fas fa-map-marked-alt"></i><span>الخريطة</span></a></li>
+            <li class="nav-section"><div class="nav-section-title">النظام</div></li>
+            <li class="nav-item"><a href="settings.html" class="nav-link"><i class="fas fa-cog"></i><span>الإعدادات</span></a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header fade-in">
+            <div class="page-title">
+                <h2>التنبيهات والإشعارات</h2>
+                <p>متابعة التنبيهات والتحذيرات من جميع المحطات</p>
+            </div>
+            <div class="page-actions">
+                <button class="btn btn-secondary" id="markAllRead">
+                    <i class="fas fa-check-double"></i>
+                    تحديد الكل كمقروء
+                </button>
+            </div>
+        </div>
+
+        <!-- Alert Filters -->
+        <div style="display: flex; gap: var(--spacing-3); margin-bottom: var(--spacing-6); flex-wrap: wrap;">
+            <button class="filter-btn active" data-filter="all">الكل</button>
+            <button class="filter-btn" data-filter="danger">
+                <i class="fas fa-exclamation-circle" style="color: var(--danger);"></i>
+                خطر
+            </button>
+            <button class="filter-btn" data-filter="warning">
+                <i class="fas fa-exclamation-triangle" style="color: var(--warning);"></i>
+                تحذير
+            </button>
+            <button class="filter-btn" data-filter="info">
+                <i class="fas fa-info-circle" style="color: var(--info);"></i>
+                معلومات
+            </button>
+        </div>
+
+        <!-- Alerts Grid -->
+        <div class="alerts-grid" id="alertsGrid">
+            <!-- Alerts loaded dynamically -->
+        </div>
+    </main>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Auth.initDashboard();
+            loadAlerts();
+            setupAlertFilters();
+
+            document.getElementById('markAllRead').addEventListener('click', function() {
+                document.querySelectorAll('.alert-card').forEach(card => {
+                    card.style.opacity = '0.6';
+                });
+                Auth.showToast('تم', 'تم تحديد جميع التنبيهات كمقروءة', 'success');
+            });
+        });
+
+        function loadAlerts() {
+            const user = Auth.getCurrentUser();
+            const alerts = WaterGuardData.getAlertsForGovernorate(user.governorateId);
+            const container = document.getElementById('alertsGrid');
+
+            const typeIcons = {
+                danger: 'fa-exclamation-circle',
+                warning: 'fa-exclamation-triangle',
+                info: 'fa-info-circle',
+                success: 'fa-check-circle'
+            };
+
+            const typeClasses = {
+                danger: 'danger',
+                warning: 'warning-alert',
+                info: 'info-alert',
+                success: 'success-alert'
+            };
+
+            container.innerHTML = alerts.map(alert => `
+                <div class="alert-card ${typeClasses[alert.type]} fade-in" data-type="${alert.type}">
+                    <div class="alert-header">
+                        <div class="alert-title">
+                            <i class="fas ${typeIcons[alert.type]}"></i>
+                            ${alert.title}
+                        </div>
+                        <span class="alert-time">${timeAgo(alert.timestamp)}</span>
+                    </div>
+                    <div class="alert-body">${alert.body}</div>
+                    <div class="alert-footer">
+                        <span class="alert-station">
+                            <i class="fas fa-map-marker-alt"></i>
+                            ${alert.stationName} - ${alert.governorateName}
+                        </span>
+                        <span class="status-badge ${alert.read ? 'inactive' : alert.type === 'danger' ? 'danger' : alert.type === 'warning' ? 'warning' : 'info'}">
+                            ${alert.read ? 'مقروء' : 'جديد'}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function setupAlertFilters() {
+            document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn[data-filter]').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const filter = this.dataset.filter;
+                    document.querySelectorAll('.alert-card').forEach(card => {
+                        card.style.display = (filter === 'all' || card.dataset.type === filter) ? '' : 'none';
+                    });
+                });
+            });
+        }
+
+        function timeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMin = Math.floor(diffMs / 60000);
+            const diffHour = Math.floor(diffMin / 60);
+            const diffDay = Math.floor(diffHour / 24);
+
+            if (diffMin < 1) return 'الآن';
+            if (diffMin < 60) return `منذ ${diffMin} دقيقة`;
+            if (diffHour < 24) return `منذ ${diffHour} ساعة`;
+            if (diffDay < 7) return `منذ ${diffDay} يوم`;
+            return date.toLocaleDateString('ar-EG');
+        }
+    </script>
+</body>
+</html>

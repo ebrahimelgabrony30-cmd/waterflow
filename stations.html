@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المحطات - WaterFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+        .modal-content {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-8);
+            max-width: 520px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: var(--shadow-2xl);
+            animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-6);
+            padding-bottom: var(--spacing-4);
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .modal-header h3 {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+        }
+        .modal-header h3 i {
+            color: var(--primary-400);
+        }
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-500);
+            cursor: pointer;
+            border: none;
+            transition: all var(--transition-fast);
+        }
+        .modal-close:hover {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-4);
+        }
+        .form-grid .form-group:last-child,
+        .form-grid .form-group:nth-last-child(2) {
+            grid-column: 1 / -1;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-2);
+        }
+        .form-group label {
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            color: var(--gray-700);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+        }
+        .form-group label i {
+            color: var(--primary-400);
+            font-size: 0.85rem;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            font-size: var(--font-size-sm);
+            color: var(--gray-800);
+            background: var(--white);
+            transition: all var(--transition-base);
+            outline: none;
+            font-family: var(--font-family);
+        }
+        .form-input:focus, .form-select:focus {
+            border-color: var(--primary-400);
+            box-shadow: 0 0 0 4px rgba(46, 134, 171, 0.1);
+        }
+        .form-input::placeholder {
+            color: var(--gray-400);
+        }
+        .form-select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2364748B' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 1rem center;
+            padding-left: 2.5rem;
+        }
+        .station-type-options {
+            display: flex;
+            gap: var(--spacing-3);
+        }
+        .station-type-option {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--spacing-2);
+            padding: var(--spacing-4);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            background: var(--white);
+        }
+        .station-type-option:hover {
+            border-color: var(--primary-300);
+            background: var(--primary-50);
+        }
+        .station-type-option.selected {
+            border-color: var(--primary-500);
+            background: var(--primary-50);
+            color: var(--primary-700);
+        }
+        .station-type-option i {
+            font-size: 1.5rem;
+            color: var(--primary-400);
+        }
+        .station-type-option.selected i {
+            color: var(--primary-600);
+        }
+        .station-type-option span {
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--spacing-3);
+            margin-top: var(--spacing-6);
+            padding-top: var(--spacing-5);
+            border-top: 1px solid var(--gray-100);
+        }
+        .btn-cancel {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-lg);
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            background: var(--gray-100);
+            color: var(--gray-600);
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        .btn-cancel:hover {
+            background: var(--gray-200);
+        }
+        .btn-submit {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-lg);
+            font-size: var(--font-size-sm);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
+            color: var(--white);
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        /* Add Station Button */
+        .btn-add-station {
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-lg);
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--success), #219a52);
+            color: var(--white);
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            box-shadow: var(--shadow-md);
+        }
+        .btn-add-station:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        .btn-add-station i {
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body class="dashboard-body">
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div style="display: flex; align-items: center;">
+            <button class="mobile-toggle" aria-label="Toggle Sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <i class="fas fa-water"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>WaterFlow</h1>
+                    <span>نظام إدارة محطات المياه وميكانيكا الموائع</span>
+                </div>
+            </div>
+        </div>
+        <div class="nav-actions">
+            <a href="alerts.html" class="nav-btn" title="التنبيهات">
+                <i class="fas fa-bell"></i>
+                <span class="badge" id="alertBadge">0</span>
+            </a>
+            <div class="user-menu">
+                <div class="user-avatar"></div>
+                <div class="user-info">
+                    <span class="user-name">المستخدم</span>
+                    <span class="user-role">-</span>
+                </div>
+                <i class="fas fa-chevron-down user-arrow"></i>
+                <div class="dropdown-menu">
+                    <a href="settings.html" class="dropdown-item">
+                        <i class="fas fa-cog"></i>
+                        <span>الإعدادات</span>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>تسجيل الخروج</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-gov">
+                <div class="gov-flag-small">
+                    <img src="" alt="Governorate Flag" id="sidebarFlag">
+                </div>
+                <div class="gov-info">
+                    <h3 id="sidebarGovName">-</h3>
+                    <span id="sidebarGovRegion">-</span>
+                </div>
+            </div>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-section"><div class="nav-section-title">الرئيسية</div></li>
+            <li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fas fa-chart-pie"></i><span>لوحة التحكم</span></a></li>
+            <li class="nav-item"><a href="alerts.html" class="nav-link"><i class="fas fa-bell"></i><span>التنبيهات</span><span class="nav-badge" id="sidebarAlertBadge">0</span></a></li>
+            <li class="nav-section"><div class="nav-section-title">الإدارة والتحليل</div></li>
+            <li class="nav-item"><a href="stations.html" class="nav-link active"><i class="fas fa-water"></i><span>المحطات</span></a></li>
+            <li class="nav-item"><a href="fluid-mechanics.html" class="nav-link"><i class="fas fa-calculator"></i><span>ميكانيكا الموائع</span></a></li>
+            <li class="nav-item"><a href="reports.html" class="nav-link"><i class="fas fa-file-alt"></i><span>التقارير</span></a></li>
+            <li class="nav-item"><a href="map.html" class="nav-link"><i class="fas fa-map-marked-alt"></i><span>الخريطة</span></a></li>
+            <li class="nav-section"><div class="nav-section-title">النظام</div></li>
+            <li class="nav-item"><a href="settings.html" class="nav-link"><i class="fas fa-cog"></i><span>الإعدادات</span></a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header fade-in">
+            <div class="page-title">
+                <h2>إدارة المحطات</h2>
+                <p>عرض وإدارة جميع محطات المياه والمستشعرات</p>
+            </div>
+            <div class="page-actions">
+                <!-- زر إضافة محطة جديدة - يظهر فقط لمدير النظام -->
+                <button class="btn-add-station" id="addStationBtn" style="display: none;">
+                    <i class="fas fa-plus-circle"></i>
+                    إضافة محطة جديدة
+                </button>
+                <div class="table-search" style="margin-left: var(--spacing-3);">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="البحث في المحطات..." id="stationSearch" style="width: 240px;">
+                </div>
+            </div>
+        </div>
+
+        <!-- Station Stats -->
+        <div class="stats-grid" id="stationStats" style="margin-bottom: var(--spacing-6);">
+            <!-- Loaded dynamically -->
+        </div>
+
+        <!-- Stations Table -->
+        <div class="table-card fade-in">
+            <div class="table-header">
+                <h3><i class="fas fa-water" style="color: var(--primary-400); margin-left: 8px;"></i>قائمة المحطات</h3>
+                <div style="display: flex; gap: var(--spacing-2);">
+                    <select class="form-select" id="statusFilter" style="width: 150px; font-size: var(--font-size-sm);">
+                        <option value="all">جميع الحالات</option>
+                        <option value="active">نشطة</option>
+                        <option value="warning">تحذير</option>
+                        <option value="danger">خطر</option>
+                    </select>
+                </div>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>المحطة</th>
+                            <th>المحافظة</th>
+                            <th>النوع</th>
+                            <th>الموقع</th>
+                            <th>السعة</th>
+                            <th>pH</th>
+                            <th>TDS</th>
+                            <th>العكارة</th>
+                            <th>الحرارة</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stationsTableBody">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Add New Station Modal -->
+        <div class="modal-overlay" id="addStationModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-plus-circle"></i> إضافة محطة جديدة</h3>
+                    <button class="modal-close" onclick="closeAddStationModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="addStationForm">
+                    <div class="form-grid">
+                        <!-- Station Name -->
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label for="stationName">
+                                <i class="fas fa-signature"></i>
+                                اسم المحطة
+                            </label>
+                            <input type="text" class="form-input" id="stationName" placeholder="أدخل اسم المحطة" required>
+                        </div>
+
+                        <!-- Governorate -->
+                        <div class="form-group">
+                            <label for="stationGovernorate">
+                                <i class="fas fa-map-marker-alt"></i>
+                                المحافظة
+                            </label>
+                            <select class="form-select" id="stationGovernorate" required>
+                                <option value="" disabled selected>اختر المحافظة</option>
+                            </select>
+                        </div>
+
+                        <!-- Station Type -->
+                        <div class="form-group">
+                            <label>
+                                <i class="fas fa-layer-group"></i>
+                                نوع المحطة
+                            </label>
+                            <div class="station-type-options">
+                                <div class="station-type-option selected" data-type="رئيسية" onclick="selectStationType(this)">
+                                    <i class="fas fa-building"></i>
+                                    <span>رئيسية</span>
+                                </div>
+                                <div class="station-type-option" data-type="فرعية" onclick="selectStationType(this)">
+                                    <i class="fas fa-code-branch"></i>
+                                    <span>فرعية</span>
+                                </div>
+                            </div>
+                            <input type="hidden" id="stationType" value="رئيسية">
+                        </div>
+
+                        <!-- Location -->
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label for="stationLocation">
+                                <i class="fas fa-location-arrow"></i>
+                                الموقع / العنوان
+                            </label>
+                            <input type="text" class="form-input" id="stationLocation" placeholder="أدخل عنوان موقع المحطة" required>
+                        </div>
+
+                        <!-- Capacity -->
+                        <div class="form-group">
+                            <label for="stationCapacity">
+                                <i class="fas fa-tachometer-alt"></i>
+                                السعة (م³/يوم)
+                            </label>
+                            <input type="number" class="form-input" id="stationCapacity" placeholder="مثال: 25000" min="1000" required>
+                        </div>
+
+                        <!-- Initial Status -->
+                        <div class="form-group">
+                            <label for="stationStatus">
+                                <i class="fas fa-info-circle"></i>
+                                الحالة الابتدائية
+                            </label>
+                            <select class="form-select" id="stationStatus">
+                                <option value="active">نشطة</option>
+                                <option value="inactive">متوقفة</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancel" onclick="closeAddStationModal()">إلغاء</button>
+                        <button type="submit" class="btn-submit" id="submitStationBtn">
+                            <i class="fas fa-check"></i>
+                            حفظ المحطة
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sensor Details Modal -->
+        <div id="sensorModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;">
+            <div style="background: var(--white); border-radius: var(--radius-xl); padding: var(--spacing-8); max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; position: relative;">
+                <button onclick="closeSensorModal()" style="position: absolute; top: var(--spacing-4); left: var(--spacing-4); width: 36px; height: 36px; border-radius: 50%; background: var(--gray-100); display: flex; align-items: center; justify-content: center; color: var(--gray-500); cursor: pointer; border: none;">
+                    <i class="fas fa-times"></i>
+                </button>
+                <h3 style="font-size: var(--font-size-xl); font-weight: 700; margin-bottom: var(--spacing-6);" id="modalStationName">تفاصيل المستشعرات</h3>
+                <div id="modalSensorContent"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        let allStations = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            Auth.initDashboard();
+            loadStations();
+            setupFilters();
+            setupAddStationFeature();
+        });
+
+        // Setup Add Station Feature (Admin Only)
+        function setupAddStationFeature() {
+            const user = Auth.getCurrentUser();
+            const addBtn = document.getElementById('addStationBtn');
+
+            // Show button only for admin
+            if (user && user.role === 'admin') {
+                addBtn.style.display = 'flex';
+            }
+
+            // Open modal on button click
+            addBtn.addEventListener('click', openAddStationModal);
+
+            // Populate governorate dropdown
+            populateGovernorateSelect();
+
+            // Form submission
+            document.getElementById('addStationForm').addEventListener('submit', handleAddStation);
+
+            // Setup delete buttons visibility
+            setupDeleteButtons();
+        }
+
+        function populateGovernorateSelect() {
+            const select = document.getElementById('stationGovernorate');
+            const governorates = WaterGuardData.governorates;
+
+            // Sort by region then name
+            const sorted = [...governorates].sort((a, b) => {
+                if (a.region !== b.region) return a.region.localeCompare(b.region);
+                return a.name.localeCompare(b.name);
+            });
+
+            let currentRegion = '';
+            sorted.forEach(gov => {
+                if (gov.region !== currentRegion) {
+                    if (currentRegion) {
+                        select.appendChild(document.createElement('optgroup'));
+                    }
+                    const optgroup = document.createElement('optgroup');
+                    optgroup.label = gov.region;
+                    select.appendChild(optgroup);
+                    currentRegion = gov.region;
+                }
+                const option = document.createElement('option');
+                option.value = gov.id;
+                option.textContent = gov.name;
+                select.lastElementChild.appendChild(option);
+            });
+        }
+
+        function selectStationType(element) {
+            document.querySelectorAll('.station-type-option').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+            document.getElementById('stationType').value = element.dataset.type;
+        }
+
+        function openAddStationModal() {
+            document.getElementById('addStationModal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAddStationModal() {
+            document.getElementById('addStationModal').classList.remove('show');
+            document.body.style.overflow = '';
+            document.getElementById('addStationForm').reset();
+            // Reset type selection
+            document.querySelectorAll('.station-type-option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelector('.station-type-option[data-type="رئيسية"]').classList.add('selected');
+            document.getElementById('stationType').value = 'رئيسية';
+        }
+
+        function handleAddStation(e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitStationBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+
+            const formData = {
+                name: document.getElementById('stationName').value.trim(),
+                governorateId: document.getElementById('stationGovernorate').value,
+                type: document.getElementById('stationType').value === 'رئيسية' ? 'محطة رئيسية' : 'محطة فرعية',
+                location: document.getElementById('stationLocation').value.trim(),
+                capacity: parseInt(document.getElementById('stationCapacity').value),
+                status: document.getElementById('stationStatus').value
+            };
+
+            // Get governorate name
+            const gov = WaterGuardData.getGovernorateById(formData.governorateId);
+            formData.governorateName = gov ? gov.name : formData.governorateId;
+
+            // Simulate API call
+            setTimeout(() => {
+                // Create new station object
+                const newStation = {
+                    id: 'new_' + Date.now(),
+                    name: formData.name,
+                    governorateId: formData.governorateId,
+                    governorateName: formData.governorateName,
+                    type: formData.type,
+                    status: formData.status,
+                    location: formData.location,
+                    capacity: formData.capacity,
+                    lastUpdate: new Date().toISOString(),
+                    sensors: {
+                        tds: Math.floor(Math.random() * 300 + 100),
+                        ph: +(Math.random() * 2 + 6.5).toFixed(1),
+                        turbidity: +(Math.random() * 3 + 0.5).toFixed(1),
+                        conductivity: Math.floor(Math.random() * 500 + 200),
+                        temperature: +(Math.random() * 10 + 20).toFixed(1),
+                        chlorine: +(Math.random() * 1.5 + 0.3).toFixed(2)
+                    }
+                };
+
+                // Add to stations list
+                allStations.unshift(newStation);
+
+                // Refresh table and stats
+                renderStationsTable(allStations);
+                updateStationStats();
+
+                // Close modal and show success
+                closeAddStationModal();
+                Auth.showToast('تم بنجاح', `تم إضافة محطة "${formData.name}" بنجاح`, 'success');
+
+                // Reset button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-check"></i> حفظ المحطة';
+            }, 1200);
+        }
+
+        function updateStationStats() {
+            const statsContainer = document.getElementById('stationStats');
+            const statusCounts = {
+                active: allStations.filter(s => s.status === 'active').length,
+                warning: allStations.filter(s => s.status === 'warning').length,
+                danger: allStations.filter(s => s.status === 'danger').length,
+                total: allStations.length
+            };
+
+            statsContainer.innerHTML = `
+                <div class="stat-card blue fade-in">
+                    <div class="stat-header">
+                        <div class="stat-info">
+                            <h3>إجمالي المحطات</h3>
+                            <div class="stat-value">${statusCounts.total}</div>
+                        </div>
+                        <div class="stat-icon"><i class="fas fa-water"></i></div>
+                    </div>
+                </div>
+                <div class="stat-card green fade-in">
+                    <div class="stat-header">
+                        <div class="stat-info">
+                            <h3>المحطات النشطة</h3>
+                            <div class="stat-value">${statusCounts.active}</div>
+                        </div>
+                        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    </div>
+                </div>
+                <div class="stat-card orange fade-in">
+                    <div class="stat-header">
+                        <div class="stat-info">
+                            <h3>محطات بتحذير</h3>
+                            <div class="stat-value">${statusCounts.warning}</div>
+                        </div>
+                        <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                    </div>
+                </div>
+                <div class="stat-card red fade-in">
+                    <div class="stat-header">
+                        <div class="stat-info">
+                            <h3>محطات بخطر</h3>
+                            <div class="stat-value">${statusCounts.danger}</div>
+                        </div>
+                        <div class="stat-icon"><i class="fas fa-exclamation-circle"></i></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadStations() {
+            const user = Auth.getCurrentUser();
+            allStations = WaterGuardData.getStationsForGovernorate(user.governorateId);
+            updateStationStats();
+            renderStationsTable(allStations);
+        }
+
+        function renderStationsTable(stations) {
+            const tbody = document.getElementById('stationsTableBody');
+            const statusLabels = { active: 'نشطة', warning: 'تحذير', danger: 'خطر', inactive: 'متوقفة' };
+            const user = Auth.getCurrentUser();
+            const isAdmin = user && user.role === 'admin';
+
+            tbody.innerHTML = stations.map(station => `
+                <tr>
+                    <td><strong>${station.name}</strong></td>
+                    <td>${station.governorateName}</td>
+                    <td>${station.type}</td>
+                    <td style="font-size: var(--font-size-xs);">${station.location}</td>
+                    <td>${station.capacity.toLocaleString('ar-EG')} م³/يوم</td>
+                    <td>${station.sensors.ph.toFixed(1)}</td>
+                    <td>${Math.round(station.sensors.tds)} ppm</td>
+                    <td>${station.sensors.turbidity.toFixed(1)} NTU</td>
+                    <td>${station.sensors.temperature.toFixed(1)}°C</td>
+                    <td><span class="status-badge ${station.status}">${statusLabels[station.status]}</span></td>
+                    <td>
+                        <div style="display: flex; gap: var(--spacing-2); align-items: center;">
+                            <button class="btn btn-sm btn-outline" onclick="showSensorDetails('${station.id}')">
+                                <i class="fas fa-chart-bar"></i>
+                                التفاصيل
+                            </button>
+                            ${isAdmin ? `<button class="btn btn-sm btn-danger delete-station-btn visible" data-station-id="${station.id}" data-station-name="${station.name}" onclick="confirmDeleteStation('${station.id}', '${station.name.replace(/'/g, "\'")}')">
+                                <i class="fas fa-trash-alt"></i>
+                                حذف
+                            </button>` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function setupFilters() {
+            const searchInput = document.getElementById('stationSearch');
+            const statusFilter = document.getElementById('statusFilter');
+
+            function applyFilters() {
+                const query = searchInput.value.toLowerCase();
+                const status = statusFilter.value;
+
+                const filtered = allStations.filter(s => {
+                    const matchesSearch = s.name.toLowerCase().includes(query) ||
+                                        s.governorateName.toLowerCase().includes(query) ||
+                                        s.location.toLowerCase().includes(query);
+                    const matchesStatus = status === 'all' || s.status === status;
+                    return matchesSearch && matchesStatus;
+                });
+
+                renderStationsTable(filtered);
+            }
+
+            searchInput.addEventListener('input', applyFilters);
+            statusFilter.addEventListener('change', applyFilters);
+        }
+
+        function showSensorDetails(stationId) {
+            const station = allStations.find(s => s.id === stationId);
+            if (!station) return;
+
+            document.getElementById('modalStationName').textContent = station.name;
+
+            const sensors = [
+                { name: 'درجة الحموضة (pH)', value: station.sensors.ph.toFixed(1), unit: '', normal: '6.5 - 8.5', status: (station.sensors.ph >= 6.5 && station.sensors.ph <= 8.5) ? 'normal' : 'warning' },
+                { name: 'الأملاح الذائبة (TDS)', value: Math.round(station.sensors.tds), unit: 'ppm', normal: '< 500', status: station.sensors.tds < 500 ? 'normal' : 'warning' },
+                { name: 'العكارة', value: station.sensors.turbidity.toFixed(1), unit: 'NTU', normal: '< 5', status: station.sensors.turbidity < 5 ? 'normal' : 'warning' },
+                { name: 'التوصيلية الكهربائية', value: Math.round(station.sensors.conductivity), unit: 'μS/cm', normal: '200 - 1500', status: (station.sensors.conductivity >= 200 && station.sensors.conductivity <= 1500) ? 'normal' : 'warning' },
+                { name: 'درجة الحرارة', value: station.sensors.temperature.toFixed(1), unit: '°C', normal: '15 - 30', status: (station.sensors.temperature >= 15 && station.sensors.temperature <= 30) ? 'normal' : 'warning' },
+                { name: 'الكلور الحر', value: station.sensors.chlorine.toFixed(2), unit: 'mg/L', normal: '0.2 - 2.0', status: (station.sensors.chlorine >= 0.2 && station.sensors.chlorine <= 2.0) ? 'normal' : 'warning' }
+            ];
+
+            const fp = station.fluidParams || { pipeDiameter: 0.20, velocity: 2.0, pipeLength: 500, frictionFactor: 0.02, pipeMaterial: 'حديد زهر مرن' };
+            const area = (Math.PI * Math.pow(fp.pipeDiameter, 2)) / 4;
+            const flowLs = area * fp.velocity * 1000;
+            const hf = fp.frictionFactor * (fp.pipeLength / fp.pipeDiameter) * (Math.pow(fp.velocity, 2) / (2 * 9.81));
+
+            const sensorsHtml = sensors.map(s => `
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-3) var(--spacing-4); border-bottom: 1px solid var(--gray-100);">
+                    <div>
+                        <div style="font-weight: 600; color: var(--gray-800);">${s.name}</div>
+                        <div style="font-size: var(--font-size-xs); color: var(--gray-400);">المعدل الطبيعي: ${s.normal}</div>
+                    </div>
+                    <div style="text-align: left;">
+                        <div style="font-size: var(--font-size-lg); font-weight: 700; color: ${s.status === 'normal' ? 'var(--success)' : 'var(--warning)'};">
+                            ${s.value} ${s.unit}
+                        </div>
+                        <div style="font-size: var(--font-size-xs); color: ${s.status === 'normal' ? 'var(--success)' : 'var(--warning)'};">
+                            <i class="fas ${s.status === 'normal' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i>
+                            ${s.status === 'normal' ? 'ضمن المعدل' : 'خارج المعدل'}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            const fluidHtml = `
+                <div style="margin-top: var(--spacing-4); padding: var(--spacing-4); background: var(--gray-50); border-radius: var(--radius-lg); border: 1px solid var(--gray-200);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                        <h4 style="font-size: var(--font-size-sm); font-weight: 700; color: var(--gray-900); display: flex; align-items: center; gap: 6px;">
+                            <i class="fas fa-calculator" style="color: var(--primary-400);"></i>
+                            معايير ميكانيكا الموائع والتدفق
+                        </h4>
+                        <a href="fluid-mechanics.html" class="btn btn-sm btn-primary" style="font-size: 11px; padding: 4px 8px;">
+                            فتح التحليل
+                        </a>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; font-size: var(--font-size-xs);">
+                        <div style="background: white; padding: 6px 10px; border-radius: var(--radius-md); border: 1px solid var(--gray-200);">
+                            <span style="color: var(--gray-500);">قطر الماسورة:</span>
+                            <strong style="color: var(--gray-800);">${(fp.pipeDiameter * 1000).toFixed(0)} مم (${fp.pipeDiameter.toFixed(2)} م)</strong>
+                        </div>
+                        <div style="background: white; padding: 6px 10px; border-radius: var(--radius-md); border: 1px solid var(--gray-200);">
+                            <span style="color: var(--gray-500);">سرعة التدفق:</span>
+                            <strong style="color: var(--gray-800);">${fp.velocity.toFixed(2)} م/ث</strong>
+                        </div>
+                        <div style="background: white; padding: 6px 10px; border-radius: var(--radius-md); border: 1px solid var(--gray-200);">
+                            <span style="color: var(--gray-500);">معدل التدفق (Q):</span>
+                            <strong style="color: var(--primary-600);">${flowLs.toFixed(1)} L/s</strong>
+                        </div>
+                        <div style="background: white; padding: 6px 10px; border-radius: var(--radius-md); border: 1px solid var(--gray-200);">
+                            <span style="color: var(--gray-500);">فقد الشحنة (hf):</span>
+                            <strong style="color: var(--gray-800);">${hf.toFixed(2)} م</strong>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('modalSensorContent').innerHTML = sensorsHtml + fluidHtml;
+
+            document.getElementById('sensorModal').style.display = 'flex';
+        }
+
+        function closeSensorModal() {
+            document.getElementById('sensorModal').style.display = 'none';
+        }
+
+        // ===========================
+        // DELETE STATION FEATURE (Admin Only)
+        // ===========================
+        let stationToDelete = null;
+
+        function setupDeleteButtons() {
+            const user = Auth.getCurrentUser();
+            if (user && user.role === 'admin') {
+                // Show all delete buttons for admin
+                document.querySelectorAll('.delete-station-btn').forEach(btn => {
+                    btn.style.display = 'inline-flex';
+                    btn.classList.add('visible');
+                });
+            }
+        }
+
+        function confirmDeleteStation(stationId, stationName) {
+            stationToDelete = stationId;
+            document.getElementById('deleteStationName').textContent = stationName;
+            document.getElementById('deleteStationModal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteStationModal').classList.remove('show');
+            document.body.style.overflow = '';
+            stationToDelete = null;
+        }
+
+        function handleDeleteStation() {
+            if (!stationToDelete) return;
+
+            const deleteBtn = document.getElementById('confirmDeleteBtn');
+            deleteBtn.disabled = true;
+            deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحذف...';
+
+            // Simulate API call
+            setTimeout(() => {
+                // Find and remove station
+                const stationIndex = allStations.findIndex(s => s.id === stationToDelete);
+                const stationName = stationIndex > -1 ? allStations[stationIndex].name : '';
+
+                if (stationIndex > -1) {
+                    allStations.splice(stationIndex, 1);
+                }
+
+                // Refresh table and stats
+                renderStationsTable(allStations);
+                updateStationStats();
+                setupDeleteButtons(); // Re-apply delete button visibility
+
+                // Close modal and show success
+                closeDeleteModal();
+                Auth.showToast('تم الحذف', `تم حذف محطة "${stationName}" بنجاح`, 'success');
+
+                // Reset button
+                deleteBtn.disabled = false;
+                deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i> نعم، احذف المحطة';
+            }, 1000);
+        }
+
+        // Setup delete confirmation button
+        document.getElementById('confirmDeleteBtn').addEventListener('click', handleDeleteStation);
+
+        // Close modal on backdrop click
+        document.getElementById('sensorModal').addEventListener('click', function(e) {
+            if (e.target === this) closeSensorModal();
+        });
+        document.getElementById('addStationModal').addEventListener('click', function(e) {
+            if (e.target === this) closeAddStationModal();
+        });
+        document.getElementById('deleteStationModal').addEventListener('click', function(e) {
+            if (e.target === this) closeDeleteModal();
+        });
+    </script>
+</body>
+</html>

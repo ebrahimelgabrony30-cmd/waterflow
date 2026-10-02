@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التقارير - WaterFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="dashboard-body">
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div style="display: flex; align-items: center;">
+            <button class="mobile-toggle" aria-label="Toggle Sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <i class="fas fa-water"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>WaterFlow</h1>
+                    <span>نظام إدارة محطات المياه وميكانيكا الموائع</span>
+                </div>
+            </div>
+        </div>
+        <div class="nav-actions">
+            <a href="alerts.html" class="nav-btn" title="التنبيهات">
+                <i class="fas fa-bell"></i>
+                <span class="badge" id="alertBadge">0</span>
+            </a>
+            <div class="user-menu">
+                <div class="user-avatar"></div>
+                <div class="user-info">
+                    <span class="user-name">المستخدم</span>
+                    <span class="user-role">-</span>
+                </div>
+                <i class="fas fa-chevron-down user-arrow"></i>
+                <div class="dropdown-menu">
+                    <a href="settings.html" class="dropdown-item">
+                        <i class="fas fa-cog"></i>
+                        <span>الإعدادات</span>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>تسجيل الخروج</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-gov">
+                <div class="gov-flag-small">
+                    <img src="" alt="Governorate Flag" id="sidebarFlag">
+                </div>
+                <div class="gov-info">
+                    <h3 id="sidebarGovName">-</h3>
+                    <span id="sidebarGovRegion">-</span>
+                </div>
+            </div>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-section"><div class="nav-section-title">الرئيسية</div></li>
+            <li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fas fa-chart-pie"></i><span>لوحة التحكم</span></a></li>
+            <li class="nav-item"><a href="alerts.html" class="nav-link"><i class="fas fa-bell"></i><span>التنبيهات</span><span class="nav-badge" id="sidebarAlertBadge">0</span></a></li>
+            <li class="nav-section"><div class="nav-section-title">الإدارة والتحليل</div></li>
+            <li class="nav-item"><a href="stations.html" class="nav-link"><i class="fas fa-water"></i><span>المحطات</span></a></li>
+            <li class="nav-item"><a href="fluid-mechanics.html" class="nav-link"><i class="fas fa-calculator"></i><span>ميكانيكا الموائع</span></a></li>
+            <li class="nav-item"><a href="reports.html" class="nav-link active"><i class="fas fa-file-alt"></i><span>التقارير</span></a></li>
+            <li class="nav-item"><a href="map.html" class="nav-link"><i class="fas fa-map-marked-alt"></i><span>الخريطة</span></a></li>
+            <li class="nav-section"><div class="nav-section-title">النظام</div></li>
+            <li class="nav-item"><a href="settings.html" class="nav-link"><i class="fas fa-cog"></i><span>الإعدادات</span></a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header fade-in">
+            <div class="page-title">
+                <h2>التقارير والإحصائيات</h2>
+                <p>تقارير شاملة عن جودة المياه وأداء المحطات</p>
+            </div>
+            <div class="page-actions">
+                <button class="btn btn-secondary" onclick="window.print()">
+                    <i class="fas fa-print"></i>
+                    طباعة
+                </button>
+                <button class="btn btn-primary" id="exportBtn">
+                    <i class="fas fa-file-export"></i>
+                    تصدير PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- Monthly Report Chart -->
+        <div class="chart-card fade-in" style="margin-bottom: var(--spacing-8);">
+            <div class="chart-header">
+                <h3><i class="fas fa-chart-bar" style="color: var(--primary-400); margin-left: 8px;"></i>التقرير الشهري لجودة المياه</h3>
+                <div class="chart-filters">
+                    <button class="filter-btn active">2026</button>
+                </div>
+            </div>
+            <div class="chart-body">
+                <canvas id="monthlyChart" width="900" height="350" style="max-width: 100%;"></canvas>
+                <div class="chart-legend" id="monthlyLegend"></div>
+            </div>
+        </div>
+
+        <!-- Report Summary Cards -->
+        <div class="stats-grid" id="reportStats" style="margin-bottom: var(--spacing-8);">
+            <!-- Loaded dynamically -->
+        </div>
+
+        <!-- Detailed Report Table -->
+        <div class="table-card fade-in">
+            <div class="table-header">
+                <h3><i class="fas fa-table" style="color: var(--primary-400); margin-left: 8px;"></i>تقرير تفصيلي بالمحطات</h3>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>المحطة</th>
+                            <th>المحافظة</th>
+                            <th>قراءات pH</th>
+                            <th>متوسط TDS</th>
+                            <th>العكارة</th>
+                            <th>الكلور</th>
+                            <th>تقييم الجودة</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTableBody">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Auth.initDashboard();
+            renderMonthlyChart();
+            renderReportStats();
+            renderReportTable();
+
+            document.getElementById('exportBtn').addEventListener('click', function() {
+                Auth.showToast('جاري التصدير', 'جاري إعداد التقرير للتصدير...', 'info');
+                setTimeout(() => {
+                    Auth.showToast('تم التصدير', 'تم تصدير التقرير بنجاح', 'success');
+                }, 2000);
+            });
+        });
+
+        function renderMonthlyChart() {
+            const canvas = document.getElementById('monthlyChart');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const data = WaterGuardData.getMonthlyReport();
+
+            const padding = { top: 30, right: 30, bottom: 50, left: 60 };
+            const chartW = canvas.width - padding.left - padding.right;
+            const chartH = canvas.height - padding.top - padding.bottom;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Grid
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = padding.top + (chartH / 5) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(padding.left + chartW, y);
+                ctx.stroke();
+
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '11px Cairo';
+                ctx.textAlign = 'right';
+                ctx.fillText(Math.round(100 - (100 / 5) * i) + '%', padding.left - 10, y + 4);
+            }
+
+            const barWidth = chartW / data.length * 0.5;
+            const spacing = chartW / data.length;
+
+            data.forEach((d, i) => {
+                const x = padding.left + spacing * i + spacing / 2;
+                const barHeight = (d.waterQuality / 100) * chartH;
+                const y = padding.top + chartH - barHeight;
+
+                // Bar
+                const gradient = ctx.createLinearGradient(0, y, 0, padding.top + chartH);
+                gradient.addColorStop(0, '#2E86AB');
+                gradient.addColorStop(1, '#1B3A5C');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.roundRect(x - barWidth / 2, y, barWidth, barHeight, [6, 6, 0, 0]);
+                ctx.fill();
+
+                // Value on top
+                ctx.fillStyle = '#1e293b';
+                ctx.font = 'bold 12px Cairo';
+                ctx.textAlign = 'center';
+                ctx.fillText(d.waterQuality + '%', x, y - 8);
+
+                // X label
+                ctx.fillStyle = '#64748b';
+                ctx.font = '11px Cairo';
+                ctx.fillText(d.month, x, canvas.height - 15);
+            });
+
+            // Legend
+            const legend = document.getElementById('monthlyLegend');
+            if (legend) {
+                legend.innerHTML = `
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: linear-gradient(to bottom, #2E86AB, #1B3A5C);"></span>
+                        <span>جودة المياه (%)</span>
+                    </div>
+                `;
+            }
+        }
+
+        function renderReportStats() {
+            const user = Auth.getCurrentUser();
+            const stations = WaterGuardData.getStationsForGovernorate(user.governorateId);
+
+            let totalPh = 0, totalTds = 0, totalTurbidity = 0;
+            stations.forEach(s => {
+                totalPh += s.sensors.ph;
+                totalTds += s.sensors.tds;
+                totalTurbidity += s.sensors.turbidity;
+            });
+
+            const avgPh = (totalPh / stations.length).toFixed(1);
+            const avgTds = Math.round(totalTds / stations.length);
+            const avgTurbidity = (totalTurbidity / stations.length).toFixed(1);
+
+            const container = document.getElementById('reportStats');
+            container.innerHTML = `
+                <div class="stat-card blue fade-in">
+                    <div class="stat-header">
+                        <div class="stat-info">
+                            <h3>متوسط pH</h3>
+                            <div class="stat-value">${avgPh}</div>
+                        </div>
+                        <div class="stat-icon"><i class="fas fa-flask"></i></div>
+                    </div>
+                    <div class="stat-footer">
+                        <span class="${avgPh >= 6.5 && avgPh <= 8.5 ? 'trend-up' : 'trend-down'}">
+                            <i class="fas ${avgPh >= 6.5 && avgPh <= 8.5 ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                            ${avgPh >= 6.5 && avgPh <= 8.5 ? 'ضمن المعدل' : 'خارج المعدل'}
+                        </span>
+                    </div>
+                </div>
+                <div class="stat-card green fade-in">
+                    <div class="stat-header">
+                        <div class="stat-info">
+                            <h3>متوسط TDS</h3>
+                            <div class="stat-value">${avgTds} <small style="font-size: var(--font-size-sm);">ppm</small></div>
+                        </div>
+                        <div class="stat-icon"><i class="fas fa-vial"></i></div>
+                    </div>
+                    <div class="stat-footer">
+                        <span class="${avgTds < 500 ? 'trend-up' : 'trend-down'}">
+                            <i class="fas ${avgTds < 500 ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                            ${avgTds < 500 ? 'ضمن المعدل' : 'أعلى من المعدل'}
+                        </span>
+                    </div>
+                </div>
+                <div class="stat-card gold fade-in">
+                    <div class="stat-header">
+                        <div class="stat-info">
+                            <h3>متوسط العكارة</h3>
+                            <div class="stat-value">${avgTurbidity} <small style="font-size: var(--font-size-sm);">NTU</small></div>
+                        </div>
+                        <div class="stat-icon"><i class="fas fa-eye"></i></div>
+                    </div>
+                    <div class="stat-footer">
+                        <span class="${avgTurbidity < 5 ? 'trend-up' : 'trend-down'}">
+                            <i class="fas ${avgTurbidity < 5 ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                            ${avgTurbidity < 5 ? 'ضمن المعدل' : 'أعلى من المعدل'}
+                        </span>
+                    </div>
+                </div>
+                <div class="stat-card purple fade-in">
+                    <div class="stat-header">
+                        <div class="stat-info">
+                            <h3>نسبة النجاح</h3>
+                            <div class="stat-value">${Math.round((stations.filter(s => s.status === 'active').length / stations.length) * 100)}%</div>
+                        </div>
+                        <div class="stat-icon"><i class="fas fa-check-double"></i></div>
+                    </div>
+                    <div class="stat-footer">
+                        <span class="trend-up">
+                            <i class="fas fa-arrow-up"></i>
+                            ${stations.filter(s => s.status === 'active').length} محطة نشطة
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderReportTable() {
+            const user = Auth.getCurrentUser();
+            const stations = WaterGuardData.getStationsForGovernorate(user.governorateId);
+            const tbody = document.getElementById('reportTableBody');
+
+            tbody.innerHTML = stations.map(station => {
+                const quality = calculateQualityScore(station.sensors);
+                const statusLabels = { active: 'نشطة', warning: 'تحذير', danger: 'خطر', inactive: 'متوقفة' };
+
+                return `
+                    <tr>
+                        <td><strong>${station.name}</strong></td>
+                        <td>${station.governorateName}</td>
+                        <td>${station.sensors.ph.toFixed(1)}</td>
+                        <td>${Math.round(station.sensors.tds)} ppm</td>
+                        <td>${station.sensors.turbidity.toFixed(1)} NTU</td>
+                        <td>${station.sensors.chlorine.toFixed(2)} mg/L</td>
+                        <td>
+                            <div class="quality-indicator">
+                                <div class="quality-bar">
+                                    <div class="quality-bar-fill ${quality.class}" style="width: ${quality.score}%"></div>
+                                </div>
+                                <span>${quality.score}%</span>
+                            </div>
+                        </td>
+                        <td><span class="status-badge ${station.status}">${statusLabels[station.status]}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function calculateQualityScore(sensors) {
+            let score = 100;
+            if (sensors.ph < 6.5 || sensors.ph > 8.5) score -= 20;
+            if (sensors.tds > 500) score -= 15;
+            if (sensors.turbidity > 5) score -= 20;
+            if (sensors.temperature > 30) score -= 10;
+            if (sensors.chlorine < 0.2 || sensors.chlorine > 2) score -= 15;
+
+            const finalScore = Math.max(0, Math.min(100, score));
+            return {
+                score: finalScore,
+                class: finalScore >= 80 ? 'good' : finalScore >= 60 ? 'moderate' : 'poor'
+            };
+        }
+    </script>
+</body>
+</html>

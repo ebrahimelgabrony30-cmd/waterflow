@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الإعدادات - WaterFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="dashboard-body">
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div style="display: flex; align-items: center;">
+            <button class="mobile-toggle" aria-label="Toggle Sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <i class="fas fa-water"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>WaterFlow</h1>
+                    <span>نظام إدارة محطات المياه وميكانيكا الموائع</span>
+                </div>
+            </div>
+        </div>
+        <div class="nav-actions">
+            <a href="alerts.html" class="nav-btn" title="التنبيهات">
+                <i class="fas fa-bell"></i>
+                <span class="badge" id="alertBadge">0</span>
+            </a>
+            <div class="user-menu">
+                <div class="user-avatar"></div>
+                <div class="user-info">
+                    <span class="user-name">المستخدم</span>
+                    <span class="user-role">-</span>
+                </div>
+                <i class="fas fa-chevron-down user-arrow"></i>
+                <div class="dropdown-menu">
+                    <a href="settings.html" class="dropdown-item">
+                        <i class="fas fa-cog"></i>
+                        <span>الإعدادات</span>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>تسجيل الخروج</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-gov">
+                <div class="gov-flag-small">
+                    <img src="" alt="Governorate Flag" id="sidebarFlag">
+                </div>
+                <div class="gov-info">
+                    <h3 id="sidebarGovName">-</h3>
+                    <span id="sidebarGovRegion">-</span>
+                </div>
+            </div>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-section"><div class="nav-section-title">الرئيسية</div></li>
+            <li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fas fa-chart-pie"></i><span>لوحة التحكم</span></a></li>
+            <li class="nav-item"><a href="alerts.html" class="nav-link"><i class="fas fa-bell"></i><span>التنبيهات</span><span class="nav-badge" id="sidebarAlertBadge">0</span></a></li>
+            <li class="nav-section"><div class="nav-section-title">الإدارة والتحليل</div></li>
+            <li class="nav-item"><a href="stations.html" class="nav-link"><i class="fas fa-water"></i><span>المحطات</span></a></li>
+            <li class="nav-item"><a href="fluid-mechanics.html" class="nav-link"><i class="fas fa-calculator"></i><span>ميكانيكا الموائع</span></a></li>
+            <li class="nav-item"><a href="reports.html" class="nav-link"><i class="fas fa-file-alt"></i><span>التقارير</span></a></li>
+            <li class="nav-item"><a href="map.html" class="nav-link"><i class="fas fa-map-marked-alt"></i><span>الخريطة</span></a></li>
+            <li class="nav-section"><div class="nav-section-title">النظام</div></li>
+            <li class="nav-item"><a href="settings.html" class="nav-link active"><i class="fas fa-cog"></i><span>الإعدادات</span></a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header fade-in">
+            <div class="page-title">
+                <h2>الإعدادات</h2>
+                <p>إدارة إعدادات الحساب والنظام</p>
+            </div>
+        </div>
+
+        <div class="settings-grid">
+            <!-- Settings Sidebar -->
+            <div class="settings-sidebar">
+                <button class="settings-nav-item active" data-section="account">
+                    <i class="fas fa-user-cog"></i>
+                    <span>الحساب</span>
+                </button>
+                <button class="settings-nav-item" data-section="notifications">
+                    <i class="fas fa-bell"></i>
+                    <span>الإشعارات</span>
+                </button>
+                <button class="settings-nav-item" data-section="thresholds">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>حدود المؤشرات</span>
+                </button>
+                <button class="settings-nav-item" data-section="system">
+                    <i class="fas fa-server"></i>
+                    <span>النظام</span>
+                </button>
+                <button class="settings-nav-item" data-section="security">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>الأمان</span>
+                </button>
+            </div>
+
+            <!-- Settings Content -->
+            <div class="settings-content fade-in">
+                <!-- Account Section -->
+                <div class="settings-section" id="account-section">
+                    <h3>معلومات الحساب</h3>
+                    <p>عرض وتحديث معلومات حسابك الشخصية</p>
+
+                    <div style="margin-top: var(--spacing-6);">
+                        <div style="display: flex; align-items: center; gap: var(--spacing-4); margin-bottom: var(--spacing-6); padding-bottom: var(--spacing-6); border-bottom: 1px solid var(--gray-100);">
+                            <div style="width: 72px; height: 72px; background: linear-gradient(135deg, var(--primary-500), var(--primary-400)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: 700;" id="settingsAvatar">م</div>
+                            <div>
+                                <div style="font-weight: 700; font-size: var(--font-size-lg);" id="settingsUserName">-</div>
+                                <div style="color: var(--gray-400); font-size: var(--font-size-sm);" id="settingsUserRole">-</div>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4);">
+                            <div class="form-group">
+                                <label class="form-label">اسم المستخدم</label>
+                                <input type="text" class="form-input" id="settingsUsername" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">نوع الحساب</label>
+                                <input type="text" class="form-input" id="settingsRole" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">المحافظة</label>
+                                <input type="text" class="form-input" id="settingsGov" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">آخر تسجيل دخول</label>
+                                <input type="text" class="form-input" id="settingsLastLogin" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications Section -->
+                <div class="settings-section" id="notifications-section" style="display: none;">
+                    <h3>إعدادات الإشعارات</h3>
+                    <p>تحكم في نوع الإشعارات التي تريد استلامها</p>
+
+                    <div style="margin-top: var(--spacing-6); display: flex; flex-direction: column; gap: var(--spacing-5);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-4); background: var(--gray-50); border-radius: var(--radius-lg);">
+                            <div>
+                                <div style="font-weight: 600;">تنبيهات الخطر</div>
+                                <div style="font-size: var(--font-size-xs); color: var(--gray-400);">إشعارات فورية عند تجاوز المؤشرات حدود الخطر</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-4); background: var(--gray-50); border-radius: var(--radius-lg);">
+                            <div>
+                                <div style="font-weight: 600;">تنبيهات التحذير</div>
+                                <div style="font-size: var(--font-size-xs); color: var(--gray-400);">إشعارات عند اقتراب المؤشرات من الحدود المسموح بها</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-4); background: var(--gray-50); border-radius: var(--radius-lg);">
+                            <div>
+                                <div style="font-weight: 600;">تقارير دورية</div>
+                                <div style="font-size: var(--font-size-xs); color: var(--gray-400);">استلام تقارير يومية وأسبوعية عبر البريد</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-4); background: var(--gray-50); border-radius: var(--radius-lg);">
+                            <div>
+                                <div style="font-weight: 600;">صوت التنبيهات</div>
+                                <div style="font-size: var(--font-size-xs); color: var(--gray-400);">تشغيل صوت عند وصول تنبيهات جديدة</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thresholds Section -->
+                <div class="settings-section" id="thresholds-section" style="display: none;">
+                    <h3>حدود المؤشرات</h3>
+                    <p>تحديد الحدود الدنيا والعليا لكل مؤشر جودة</p>
+
+                    <div style="margin-top: var(--spacing-6); display: flex; flex-direction: column; gap: var(--spacing-5);">
+                        <div style="padding: var(--spacing-4); background: var(--gray-50); border-radius: var(--radius-lg);">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-3);">
+                                <span style="font-weight: 600;">درجة الحموضة (pH)</span>
+                                <span style="color: var(--primary-500); font-weight: 700;">6.5 - 8.5</span>
+                            </div>
+                            <div style="display: flex; gap: var(--spacing-3); align-items: center;">
+                                <input type="range" min="0" max="14" value="6.5" style="flex: 1;" class="form-input">
+                                <input type="range" min="0" max="14" value="8.5" style="flex: 1;" class="form-input">
+                            </div>
+                        </div>
+                        <div style="padding: var(--spacing-4); background: var(--gray-50); border-radius: var(--radius-lg);">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-3);">
+                                <span style="font-weight: 600;">الأملاح الذائبة (TDS)</span>
+                                <span style="color: var(--primary-500); font-weight: 700;">50 - 500 ppm</span>
+                            </div>
+                            <div style="display: flex; gap: var(--spacing-3); align-items: center;">
+                                <input type="range" min="0" max="1000" value="50" style="flex: 1;" class="form-input">
+                                <input type="range" min="0" max="1000" value="500" style="flex: 1;" class="form-input">
+                            </div>
+                        </div>
+                        <div style="padding: var(--spacing-4); background: var(--gray-50); border-radius: var(--radius-lg);">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-3);">
+                                <span style="font-weight: 600;">العكارة</span>
+                                <span style="color: var(--primary-500); font-weight: 700;">0 - 5 NTU</span>
+                            </div>
+                            <div style="display: flex; gap: var(--spacing-3); align-items: center;">
+                                <input type="range" min="0" max="20" value="0" style="flex: 1;" class="form-input">
+                                <input type="range" min="0" max="20" value="5" style="flex: 1;" class="form-input">
+                            </div>
+                        </div>
+                        <div style="padding: var(--spacing-4); background: var(--gray-50); border-radius: var(--radius-lg);">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-3);">
+                                <span style="font-weight: 600;">الكلور الحر</span>
+                                <span style="color: var(--primary-500); font-weight: 700;">0.2 - 2.0 mg/L</span>
+                            </div>
+                            <div style="display: flex; gap: var(--spacing-3); align-items: center;">
+                                <input type="range" min="0" max="5" value="0.2" step="0.1" style="flex: 1;" class="form-input">
+                                <input type="range" min="0" max="5" value="2.0" step="0.1" style="flex: 1;" class="form-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" style="margin-top: var(--spacing-6);" id="saveThresholds">
+                        <i class="fas fa-save"></i>
+                        حفظ الإعدادات
+                    </button>
+                </div>
+
+                <!-- System Section -->
+                <div class="settings-section" id="system-section" style="display: none;">
+                    <h3>إعدادات النظام</h3>
+                    <p>إعدادات عامة لنظام المراقبة</p>
+
+                    <div style="margin-top: var(--spacing-6); display: flex; flex-direction: column; gap: var(--spacing-5);">
+                        <div style="padding: var(--spacing-4); background: var(--gray-50); border-radius: var(--radius-lg);">
+                            <div style="font-weight: 600; margin-bottom: var(--spacing-2);">فترة التحديث</div>
+                            <div style="font-size: var(--font-size-xs); color: var(--gray-400); margin-bottom: var(--spacing-3);">الفترة الزمنية لتحديث بيانات المستشعرات</div>
+                            <select class="form-select" style="width: 200px;">
+                                <option>كل 30 ثانية</option>
+                                <option>كل دقيقة</option>
+                                <option>كل 5 دقائق</option>
+                                <option>كل 15 دقيقة</option>
+                            </select>
+                        </div>
+                        <div style="padding: var(--spacing-4); background: var(--gray-50); border-radius: var(--radius-lg);">
+                            <div style="font-weight: 600; margin-bottom: var(--spacing-2);">المنطقة الزمنية</div>
+                            <select class="form-select" style="width: 200px;">
+                                <option>القاهرة (GMT+2)</option>
+                                <option>الإسكندرية (GMT+2)</option>
+                                <option>أسوان (GMT+2)</option>
+                            </select>
+                        </div>
+                        <div style="padding: var(--spacing-4); background: var(--gray-50); border-radius: var(--radius-lg);">
+                            <div style="font-weight: 600; margin-bottom: var(--spacing-2);">اللغة</div>
+                            <select class="form-select" style="width: 200px;">
+                                <option>العربية</option>
+                                <option>English</option>
+                            </select>
+                        </div>
+                        <div style="padding: var(--spacing-4); background: var(--gray-50); border-radius: var(--radius-lg);">
+                            <div style="font-weight: 600; margin-bottom: var(--spacing-2);">تنسيق التاريخ</div>
+                            <select class="form-select" style="width: 200px;">
+                                <option>هجري / ميلادي</option>
+                                <option>ميلادي فقط</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" style="margin-top: var(--spacing-6);" id="saveSystem">
+                        <i class="fas fa-save"></i>
+                        حفظ الإعدادات
+                    </button>
+                </div>
+
+                <!-- Security Section -->
+                <div class="settings-section" id="security-section" style="display: none;">
+                    <h3>الأمان</h3>
+                    <p>إدارة كلمة المرور وإعدادات الأمان</p>
+
+                    <div style="margin-top: var(--spacing-6); display: flex; flex-direction: column; gap: var(--spacing-5);">
+                        <div class="form-group">
+                            <label class="form-label">كلمة المرور الحالية</label>
+                            <div class="input-wrapper">
+                                <input type="password" class="form-input" placeholder="أدخل كلمة المرور الحالية">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">كلمة المرور الجديدة</label>
+                            <div class="input-wrapper">
+                                <input type="password" class="form-input" placeholder="أدخل كلمة المرور الجديدة">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">تأكيد كلمة المرور الجديدة</label>
+                            <div class="input-wrapper">
+                                <input type="password" class="form-input" placeholder="أعد إدخال كلمة المرور الجديدة">
+                            </div>
+                        </div>
+                        <div style="padding: var(--spacing-4); background: var(--warning-light); border-radius: var(--radius-lg); border: 1px solid var(--warning); display: flex; align-items: center; gap: var(--spacing-3);">
+                            <i class="fas fa-info-circle" style="color: var(--warning); font-size: 1.2rem;"></i>
+                            <div style="font-size: var(--font-size-sm);">
+                                <strong>تنبيه:</strong> عند تغيير كلمة المرور، سيتم تسجيل خروجك من جميع الأجهزة
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" style="margin-top: var(--spacing-6);" id="changePassword">
+                        <i class="fas fa-key"></i>
+                        تغيير كلمة المرور
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check admin access first
+            if (!Auth.protectAdminPage()) {
+                return; // Stop loading if not admin
+            }
+
+            // Initialize dashboard UI (sidebar, nav, user menu)
+            Auth.initDashboard();
+
+            // Load settings page specific content
+            loadUserInfo();
+            setupSettingsNav();
+
+            // Save buttons
+            document.getElementById('saveThresholds').addEventListener('click', () => {
+                Auth.showToast('تم الحفظ', 'تم حفظ إعدادات حدود المؤشرات بنجاح', 'success');
+            });
+
+            document.getElementById('saveSystem').addEventListener('click', () => {
+                Auth.showToast('تم الحفظ', 'تم حفظ إعدادات النظام بنجاح', 'success');
+            });
+
+            document.getElementById('changePassword').addEventListener('click', () => {
+                Auth.showToast('تم التغيير', 'تم تغيير كلمة المرور بنجاح', 'success');
+            });
+        });
+
+        function loadUserInfo() {
+            const user = Auth.getCurrentUser();
+            if (!user) return;
+
+            const roleLabels = {
+                'admin': 'مدير النظام',
+                'general': 'المراقب العام',
+                'governorate': 'مراقب محافظة'
+            };
+
+            document.getElementById('settingsUserName').textContent = user.name;
+            document.getElementById('settingsUserRole').textContent = roleLabels[user.role] || user.role;
+            document.getElementById('settingsAvatar').textContent = user.name.charAt(0);
+            document.getElementById('settingsUsername').value = user.username;
+            document.getElementById('settingsRole').value = roleLabels[user.role] || user.role;
+            document.getElementById('settingsGov').value = user.governorateName || 'جميع المحافظات';
+            document.getElementById('settingsLastLogin').value = new Date(user.loginTime).toLocaleString('ar-EG');
+        }
+
+        function setupSettingsNav() {
+            const navItems = document.querySelectorAll('.settings-nav-item');
+            const sections = document.querySelectorAll('.settings-section');
+
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const sectionId = item.dataset.section;
+
+                    navItems.forEach(n => n.classList.remove('active'));
+                    item.classList.add('active');
+
+                    sections.forEach(s => s.style.display = 'none');
+                    document.getElementById(`${sectionId}-section`).style.display = 'block';
+                });
+            });
+        }
+    </script>
+</body>
+</html>

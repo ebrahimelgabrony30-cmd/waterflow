@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - WaterFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="dashboard-body">
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div style="display: flex; align-items: center;">
+            <button class="mobile-toggle" aria-label="Toggle Sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <i class="fas fa-water"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>WaterFlow</h1>
+                    <span>نظام إدارة محطات المياه وميكانيكا الموائع</span>
+                </div>
+            </div>
+        </div>
+        <div class="nav-actions">
+            <button class="nav-btn" id="refreshBtn" title="تحديث البيانات">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+            <a href="alerts.html" class="nav-btn" title="التنبيهات">
+                <i class="fas fa-bell"></i>
+                <span class="badge" id="alertBadge">0</span>
+            </a>
+            <div class="user-menu">
+                <div class="user-avatar"></div>
+                <div class="user-info">
+                    <span class="user-name">المستخدم</span>
+                    <span class="user-role">-</span>
+                </div>
+                <i class="fas fa-chevron-down user-arrow"></i>
+                <div class="dropdown-menu">
+                    <a href="settings.html" class="dropdown-item">
+                        <i class="fas fa-cog"></i>
+                        <span>الإعدادات</span>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>تسجيل الخروج</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-gov">
+                <div class="gov-flag-small">
+                    <img src="" alt="Governorate Flag" id="sidebarFlag">
+                </div>
+                <div class="gov-info">
+                    <h3 id="sidebarGovName">-</h3>
+                    <span id="sidebarGovRegion">-</span>
+                </div>
+            </div>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-section">
+                <div class="nav-section-title">الرئيسية</div>
+            </li>
+            <li class="nav-item">
+                <a href="dashboard.html" class="nav-link active">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>لوحة التحكم</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="alerts.html" class="nav-link">
+                    <i class="fas fa-bell"></i>
+                    <span>التنبيهات</span>
+                    <span class="nav-badge" id="sidebarAlertBadge">0</span>
+                </a>
+            </li>
+            <li class="nav-section">
+                <div class="nav-section-title">الإدارة والتحليل</div>
+            </li>
+            <li class="nav-item">
+                <a href="stations.html" class="nav-link">
+                    <i class="fas fa-water"></i>
+                    <span>المحطات</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="fluid-mechanics.html" class="nav-link">
+                    <i class="fas fa-calculator"></i>
+                    <span>ميكانيكا الموائع</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="reports.html" class="nav-link">
+                    <i class="fas fa-file-alt"></i>
+                    <span>التقارير</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="map.html" class="nav-link">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>الخريطة</span>
+                </a>
+            </li>
+            <li class="nav-section">
+                <div class="nav-section-title">النظام</div>
+            </li>
+            <li class="nav-item">
+                <a href="settings.html" class="nav-link">
+                    <i class="fas fa-cog"></i>
+                    <span>الإعدادات</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Page Header -->
+        <div class="page-header fade-in">
+            <div class="page-title">
+                <h2>لوحة التحكم</h2>
+                <p>نظرة عامة على حالة محطات المياه والمؤشرات</p>
+            </div>
+            <div class="page-actions">
+                <button class="btn btn-secondary" onclick="window.print()">
+                    <i class="fas fa-print"></i>
+                    طباعة
+                </button>
+                <a href="reports.html" class="btn btn-primary">
+                    <i class="fas fa-file-export"></i>
+                    تصدير التقرير
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid" id="statsGrid">
+            <!-- Stats will be loaded dynamically -->
+        </div>
+
+        <!-- Fluid Mechanics Analysis Card (Prompt Requirement #15) -->
+        <div class="fluid-card fade-in" id="fluidMechanicsCard" style="margin-bottom: var(--spacing-8); border-right: 4px solid var(--primary-400);">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--spacing-4);">
+                <div style="display: flex; align-items: center; gap: var(--spacing-4);">
+                    <div style="width: 48px; height: 48px; border-radius: var(--radius-lg); background: var(--primary-50); color: var(--primary-500); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <h3 style="font-size: var(--font-size-base); font-weight: 700; color: var(--gray-900); margin: 0;">
+                                تحليل ميكانيكا الموائع (Fluid Mechanics Analysis)
+                            </h3>
+                            <span class="badge" style="background: var(--primary-50); color: var(--primary-600); font-size: 11px;">نشط</span>
+                        </div>
+                        <p style="font-size: var(--font-size-xs); color: var(--gray-500); margin-top: 2px;" id="dashFluidSub">
+                            المحطة الحالية: <strong id="dashFluidStation">Damietta Water Station #03</strong> | معدل التدفق: <strong id="dashFluidFlow" style="color: var(--primary-600);">62.8 L/s</strong> | هبوط الضغط: <strong id="dashFluidLoss">10.19 m (1.00 bar)</strong>
+                        </p>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: var(--spacing-3);">
+                    <a href="fluid-mechanics.html" class="btn btn-primary btn-sm">
+                        <i class="fas fa-up-right-from-square"></i>
+                        فتح التحليل (Open Analysis)
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-grid">
+            <div class="chart-card fade-in">
+                <div class="chart-header">
+                    <h3><i class="fas fa-chart-line" style="color: var(--primary-400); margin-left: 8px;"></i>جودة المياه خلال الأسبوع</h3>
+                    <div class="chart-filters">
+                        <button class="filter-btn active" data-days="7">أسبوع</button>
+                        <button class="filter-btn" data-days="30">شهر</button>
+                    </div>
+                </div>
+                <div class="chart-body">
+                    <div id="qualityChart" style="height: 300px;">
+                        <!-- Chart rendered by JS -->
+                    </div>
+                </div>
+            </div>
+            <div class="chart-card fade-in">
+                <div class="chart-header">
+                    <h3><i class="fas fa-chart-pie" style="color: var(--accent-gold); margin-left: 8px;"></i>حالة المحطات</h3>
+                </div>
+                <div class="chart-body">
+                    <div id="stationsChart" style="height: 300px; display: flex; align-items: center; justify-content: center;">
+                        <!-- Donut chart rendered by JS -->
+                    </div>
+                    <div class="chart-legend" id="stationsLegend"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Stations Table -->
+        <div class="table-card fade-in">
+            <div class="table-header">
+                <h3><i class="fas fa-water" style="color: var(--primary-400); margin-left: 8px;"></i>آخر تحديثات المحطات</h3>
+                <div class="table-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="البحث في المحطات..." id="stationSearch">
+                </div>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>المحطة</th>
+                            <th>المحافظة</th>
+                            <th>النوع</th>
+                            <th>pH</th>
+                            <th>TDS</th>
+                            <th>العكارة</th>
+                            <th>الحالة</th>
+                            <th>الجودة</th>
+                            <th>آخر تحديث</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stationsTableBody">
+                        <!-- Table rows loaded by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Sensor Readings -->
+        <div class="chart-card fade-in" style="margin-top: var(--spacing-8);">
+            <div class="chart-header">
+                <h3><i class="fas fa-microchip" style="color: var(--primary-400); margin-left: 8px;"></i>قراءات المستشعرات الحية</h3>
+                <span style="font-size: var(--font-size-xs); color: var(--gray-400);">
+                    <i class="fas fa-circle" style="color: var(--success); font-size: 8px;"></i>
+                    متصل
+                </span>
+            </div>
+            <div class="stats-grid" id="sensorCards" style="margin-top: var(--spacing-5);">
+                <!-- Sensor cards loaded by JS -->
+            </div>
+        </div>
+    </main>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Auth.initDashboard();
+            Dashboard.init();
+        });
+    </script>
+</body>
+</html>

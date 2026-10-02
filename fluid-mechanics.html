@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ميكانيكا الموائع - WaterFlow</title>
+    <meta name="description" content="WaterFlow - Water Station Management & Fluid Mechanics Analysis System">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="dashboard-body">
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div style="display: flex; align-items: center;">
+            <button class="mobile-toggle" aria-label="Toggle Sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <i class="fas fa-water"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>WaterFlow</h1>
+                    <span>نظام إدارة محطات المياه وميكانيكا الموائع</span>
+                </div>
+            </div>
+        </div>
+        <div class="nav-actions">
+            <button class="nav-btn" id="refreshBtn" title="تحديث البيانات" onclick="FluidMechanics.computeAndRender()">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+            <a href="alerts.html" class="nav-btn" title="التنبيهات">
+                <i class="fas fa-bell"></i>
+                <span class="badge" id="alertBadge">0</span>
+            </a>
+            <div class="user-menu">
+                <div class="user-avatar"></div>
+                <div class="user-info">
+                    <span class="user-name">المستخدم</span>
+                    <span class="user-role">-</span>
+                </div>
+                <i class="fas fa-chevron-down user-arrow"></i>
+                <div class="dropdown-menu">
+                    <a href="settings.html" class="dropdown-item">
+                        <i class="fas fa-cog"></i>
+                        <span>الإعدادات</span>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>تسجيل الخروج</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-gov">
+                <div class="gov-flag-small">
+                    <img src="" alt="Governorate Flag" id="sidebarFlag">
+                </div>
+                <div class="gov-info">
+                    <h3 id="sidebarGovName">-</h3>
+                    <span id="sidebarGovRegion">-</span>
+                </div>
+            </div>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-section"><div class="nav-section-title">الرئيسية</div></li>
+            <li class="nav-item">
+                <a href="dashboard.html" class="nav-link">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>لوحة التحكم</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="alerts.html" class="nav-link">
+                    <i class="fas fa-bell"></i>
+                    <span>التنبيهات</span>
+                    <span class="nav-badge" id="sidebarAlertBadge">0</span>
+                </a>
+            </li>
+            <li class="nav-section"><div class="nav-section-title">الإدارة والتحليل</div></li>
+            <li class="nav-item">
+                <a href="stations.html" class="nav-link">
+                    <i class="fas fa-water"></i>
+                    <span>المحطات</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="fluid-mechanics.html" class="nav-link active">
+                    <i class="fas fa-calculator"></i>
+                    <span>ميكانيكا الموائع</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="reports.html" class="nav-link">
+                    <i class="fas fa-file-alt"></i>
+                    <span>التقارير</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="map.html" class="nav-link">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>الخريطة</span>
+                </a>
+            </li>
+            <li class="nav-section"><div class="nav-section-title">النظام</div></li>
+            <li class="nav-item">
+                <a href="settings.html" class="nav-link">
+                    <i class="fas fa-cog"></i>
+                    <span>الإعدادات</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Page Header -->
+        <div class="page-header fade-in">
+            <div class="page-title">
+                <h2>تحليل ميكانيكا الموائع (Fluid Mechanics Analysis)</h2>
+                <p>تطبيقات عملية وحسابات تدفق المياه وفواقد الاحتكاك داخل خطوط ومواسير المحطات</p>
+            </div>
+            <div class="page-actions">
+                <button class="btn btn-secondary" id="resetDefaultsBtn">
+                    <i class="fas fa-undo"></i>
+                    إعادة تعيين للقيم الافتراضية
+                </button>
+                <button class="btn btn-primary" onclick="window.print()">
+                    <i class="fas fa-print"></i>
+                    طباعة تقرير التحليل
+                </button>
+            </div>
+        </div>
+
+        <!-- Station Selector & Hero Specs Bar -->
+        <div class="station-fluid-hero fade-in">
+            <div class="hero-station-grid">
+                <div>
+                    <div style="display: flex; align-items: center; gap: var(--spacing-3); margin-bottom: var(--spacing-3);">
+                        <span class="badge" style="background: rgba(201, 162, 39, 0.25); color: #FDE68A; border: 1px solid rgba(201, 162, 39, 0.4); font-size: 11px; padding: 4px 10px; border-radius: 9999px;">
+                            <i class="fas fa-link"></i> ربط هيدروليكي حي بالمحطة
+                        </span>
+                        <span id="stationCardStatus" class="status-badge active">نشطة</span>
+                    </div>
+                    <h2 id="stationCardName" style="font-size: 1.6rem; font-weight: 800; margin-bottom: var(--spacing-2);">Damietta Water Station #03</h2>
+                    <p style="color: var(--primary-100); font-size: var(--font-size-sm); margin-bottom: var(--spacing-4);">
+                        <i class="fas fa-map-marker-alt" style="margin-left: 6px;"></i>
+                        <span id="stationCardLoc">مركز كفر البطيخ - دمياط</span> | 
+                        <span id="stationCardGov">محافظة دمياط</span> | 
+                        النوع: <span id="stationCardType">محطة رئيسية</span> | 
+                        الطاقة: <span id="stationCardCap">48,000 م³/يوم</span>
+                    </p>
+                    <div style="background: rgba(15, 23, 42, 0.4); border-radius: var(--radius-md); padding: 10px 14px; display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                        <i class="fas fa-ring" style="color: var(--accent-gold-light);"></i>
+                        <span id="stationCardPipe" style="font-size: var(--font-size-xs); font-weight: 600; color: #E2E8F0;">
+                            خط طرد رئيسي: D=200 مم (حديد زهر مرن)
+                        </span>
+                    </div>
+                </div>
+                <div class="station-select-wrapper">
+                    <label for="stationSelect">
+                        <i class="fas fa-building-flag" style="margin-left: 4px;"></i>
+                        اختر محطة المياه (Select Water Station)
+                    </label>
+                    <select id="stationSelect" aria-label="Select Water Station">
+                        <!-- Populated dynamically with Damietta #03 as default -->
+                    </select>
+                    <div style="font-size: 11px; color: #94A3B8; margin-top: 8px; line-height: 1.4;">
+                        تحميل تلقائي لبيانات المواسير والتدفق الخاصة بالمحطة المختارة.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Presentation Demo Scenarios Toolbar -->
+        <div class="scenarios-toolbar fade-in">
+            <div class="scenarios-title">
+                <i class="fas fa-chalkboard-user" style="color: var(--primary-400);"></i>
+                <span>سيناريوهات العرض الأكاديمي (Presentation Demos):</span>
+            </div>
+            <div class="scenarios-btns">
+                <button type="button" class="scenario-chip-btn" id="demoScenario1">
+                    <i class="fas fa-play-circle" style="color: var(--primary-400);"></i>
+                    <span>1. محطة دمياط #03 (D=0.20m, V=2m/s)</span>
+                </button>
+                <button type="button" class="scenario-chip-btn" id="demoScenario2">
+                    <i class="fas fa-arrow-trend-up" style="color: var(--success);"></i>
+                    <span>2. زيادة القطر إلى D=0.30m (تضاعف التدفق)</span>
+                </button>
+                <button type="button" class="scenario-chip-btn" id="demoScenario3">
+                    <i class="fas fa-gauge-simple-high" style="color: var(--warning);"></i>
+                    <span>3. فواقد دارسي-فايسباخ (Darcy-Weisbach Loss)</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Validation Error Message Alert -->
+        <div id="validationAlert" class="error-message" style="display: none; margin-bottom: var(--spacing-6);">
+            <i class="fas fa-circle-exclamation"></i>
+            <span id="validationMessage">الرجاء إدخال قيم صحيحة أكبر من الصفر.</span>
+        </div>
+
+        <!-- Two Column Calculators Grid -->
+        <div class="fluid-layout-grid">
+            <!-- 1. Flow Rate Calculator Card -->
+            <div class="fluid-card fade-in">
+                <div class="fluid-card-header">
+                    <h3>
+                        <i class="fas fa-faucet-drip"></i>
+                        <span>حاسبة معدل التدفق (Flow Rate Calculator)</span>
+                    </h3>
+                    <span class="badge-formula">Q = A × V</span>
+                </div>
+
+                <div class="formula-banner">
+                    <div>
+                        <div class="formula-math">A = <span class="hl">π D² / 4</span> &nbsp;|&nbsp; Q = <span class="hl">A × V</span></div>
+                    </div>
+                    <div class="formula-desc">
+                        مساحة المقطع × سرعة المياه
+                    </div>
+                </div>
+
+                <!-- Input: Pipe Diameter -->
+                <div class="input-slider-row">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <label class="form-label" for="pipeDiameterInput" style="margin: 0; font-weight: 700;">
+                            <i class="fas fa-arrows-left-right-to-line" style="color: var(--primary-400); margin-left: 6px;"></i>
+                            قطر الماسورة (Pipe Diameter - D)
+                        </label>
+                        <span style="font-size: var(--font-size-xs); color: var(--gray-500);">المدى: 0.05 إلى 1.50 م</span>
+                    </div>
+                    <div class="slider-controls">
+                        <input type="range" id="pipeDiameterSlider" min="0.05" max="1.50" step="0.01" value="0.20" aria-label="Pipe Diameter Slider">
+                        <div class="number-box">
+                            <input type="number" id="pipeDiameterInput" min="0.01" max="5.0" step="0.01" value="0.20" aria-label="Pipe Diameter in meters">
+                            <span class="unit-label">متر (m)</span>
+                        </div>
+                    </div>
+                    <div class="presets-container">
+                        <span class="presets-label">أقطار قياسية:</span>
+                        <button type="button" class="preset-btn" data-d="0.10">100 مم</button>
+                        <button type="button" class="preset-btn" data-d="0.15">150 مم</button>
+                        <button type="button" class="preset-btn" data-d="0.20">200 مم (افتراضي)</button>
+                        <button type="button" class="preset-btn" data-d="0.25">250 مم</button>
+                        <button type="button" class="preset-btn" data-d="0.30">300 مم</button>
+                        <button type="button" class="preset-btn" data-d="0.40">400 مم</button>
+                        <button type="button" class="preset-btn" data-d="0.50">500 مم</button>
+                    </div>
+                </div>
+
+                <!-- Input: Water Velocity -->
+                <div class="input-slider-row">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <label class="form-label" for="waterVelocityInput" style="margin: 0; font-weight: 700;">
+                            <i class="fas fa-gauge-high" style="color: var(--primary-400); margin-left: 6px;"></i>
+                            سرعة المياه (Water Velocity - V)
+                        </label>
+                        <span style="font-size: var(--font-size-xs); color: var(--gray-500);">المدى: 0.2 إلى 6.0 م/ث</span>
+                    </div>
+                    <div class="slider-controls">
+                        <input type="range" id="waterVelocitySlider" min="0.2" max="6.0" step="0.1" value="2.0" aria-label="Water Velocity Slider">
+                        <div class="number-box">
+                            <input type="number" id="waterVelocityInput" min="0.1" max="15.0" step="0.1" value="2.0" aria-label="Water Velocity in m/s">
+                            <span class="unit-label">م/ث (m/s)</span>
+                        </div>
+                    </div>
+                    <div class="presets-container">
+                        <span class="presets-label">سرعات شائعة:</span>
+                        <button type="button" class="preset-btn" data-v="1.0">1.0 م/ث (اقتصادية)</button>
+                        <button type="button" class="preset-btn" data-v="1.5">1.5 م/ث (توزيع)</button>
+                        <button type="button" class="preset-btn" data-v="2.0">2.0 م/ث (محطات طرد)</button>
+                        <button type="button" class="preset-btn" data-v="2.5">2.5 م/ث (قصوى)</button>
+                    </div>
+                </div>
+
+                <!-- Calculated Flow Results -->
+                <div style="margin-top: var(--spacing-2);">
+                    <div style="font-size: var(--font-size-xs); font-weight: 700; color: var(--gray-700); margin-bottom: 8px;">
+                        نتائج الحسابات الرياضية المباشرة:
+                    </div>
+                    <div class="results-metrics-grid">
+                        <div class="metric-box primary">
+                            <div class="metric-title">مساحة المقطع (Area - A)</div>
+                            <div class="metric-val" id="resArea">0.0314 m²</div>
+                            <div class="metric-sub">A = π × D² / 4</div>
+                        </div>
+                        <div class="metric-box primary">
+                            <div class="metric-title">معدل التدفق (Flow - Q)</div>
+                            <div class="metric-val" id="resFlowM3s">0.0628 m³/s</div>
+                            <div class="metric-sub">متر مكعب لكل ثانية</div>
+                        </div>
+                        <div class="metric-box gold">
+                            <div class="metric-title">معدل التدفق (L/s)</div>
+                            <div class="metric-val" id="resFlowLs">62.8 L/s</div>
+                            <div class="metric-sub">لتر لكل ثانية (Q × 1000)</div>
+                        </div>
+                        <div class="metric-box green">
+                            <div class="metric-title">معدل التدفق (L/min)</div>
+                            <div class="metric-val" id="resFlowLmin">3768 L/min</div>
+                            <div class="metric-sub">لتر لكل دقيقة (Q × 60000)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reynolds Number & Regime -->
+                <div style="background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: var(--spacing-3) var(--spacing-4); display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-3);">
+                    <div>
+                        <div style="font-size: var(--font-size-xs); font-weight: 700; color: var(--gray-700);">
+                            رقم رينولدز (Reynolds Number - Re): <strong id="resReynolds" style="color: var(--primary-600); font-size: 1rem;">398,406</strong>
+                        </div>
+                        <div id="resRegimeDesc" style="font-size: 11px; color: var(--gray-500); margin-top: 2px;">
+                            جريان دوامي عالي الخلط بقوى قصور ذاتي سائدة.
+                        </div>
+                    </div>
+                    <span id="resRegime" class="status-badge blue" style="white-space: nowrap;">Turbulent (مضطرب)</span>
+                </div>
+            </div>
+
+            <!-- 2. Pressure & Head Loss Calculator Card -->
+            <div class="fluid-card fade-in">
+                <div class="fluid-card-header">
+                    <h3>
+                        <i class="fas fa-gauge-simple-high"></i>
+                        <span>فواقد الاحتكاك وهبوط الضغط (Darcy-Weisbach)</span>
+                    </h3>
+                    <span class="badge-formula">hf = f (L/D) (V²/2g)</span>
+                </div>
+
+                <div class="formula-banner">
+                    <div>
+                        <div class="formula-math">hf = <span class="hl">f (L/D) (V²/2g)</span> &nbsp;|&nbsp; ΔP = <span class="hl">ρ g hf</span></div>
+                    </div>
+                    <div class="formula-desc">
+                        معادلة دارسي-فايسباخ للفواقد
+                    </div>
+                </div>
+
+                <!-- Input: Pipe Length -->
+                <div class="input-slider-row">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <label class="form-label" for="pipeLengthInput" style="margin: 0; font-weight: 700;">
+                            <i class="fas fa-ruler-horizontal" style="color: var(--primary-400); margin-left: 6px;"></i>
+                            طول الماسورة (Pipe Length - L)
+                        </label>
+                        <span style="font-size: var(--font-size-xs); color: var(--gray-500);">المدى: 50 إلى 3000 م</span>
+                    </div>
+                    <div class="slider-controls">
+                        <input type="range" id="pipeLengthSlider" min="50" max="3000" step="25" value="500" aria-label="Pipe Length Slider">
+                        <div class="number-box">
+                            <input type="number" id="pipeLengthInput" min="10" max="10000" step="25" value="500" aria-label="Pipe Length in meters">
+                            <span class="unit-label">متر (m)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input: Friction Factor & Pipe Material -->
+                <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: var(--spacing-3);">
+                    <div>
+                        <label class="form-label" for="pipeMaterialSelect" style="font-weight: 700; font-size: var(--font-size-xs);">
+                            <i class="fas fa-layer-group" style="color: var(--primary-400); margin-left: 4px;"></i>
+                            مادة الماسورة (Material Preset)
+                        </label>
+                        <select id="pipeMaterialSelect" class="form-select" style="padding: 8px 12px; font-size: var(--font-size-xs);" aria-label="Select Pipe Material">
+                            <option value="ductile_iron" selected>حديد زهر مرن - Ductile Iron (f=0.020)</option>
+                            <option value="cast_iron">حديد زهر رمادي - Cast Iron (f=0.025)</option>
+                            <option value="hdpe">بولي إيثيلين - HDPE (f=0.015)</option>
+                            <option value="pvc">بولي فينيل كلوريد - uPVC (f=0.015)</option>
+                            <option value="steel">صلب تجاري - Commercial Steel (f=0.018)</option>
+                            <option value="concrete">خرسانة مسلحة - Concrete (f=0.030)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label" for="frictionFactorInput" style="font-weight: 700; font-size: var(--font-size-xs);">
+                            <i class="fas fa-square-root-variable" style="color: var(--primary-400); margin-left: 4px;"></i>
+                            معامل الاحتكاك (f)
+                        </label>
+                        <input type="number" id="frictionFactorInput" class="form-input" style="padding: 8px 12px; font-size: var(--font-size-xs); font-weight: 700;" min="0.005" max="0.1" step="0.001" value="0.020" aria-label="Darcy Friction Factor">
+                    </div>
+                </div>
+
+                <!-- Constants Info Banner -->
+                <div style="display: flex; gap: var(--spacing-4); background: var(--gray-50); border: 1px dashed var(--gray-300); border-radius: var(--radius-md); padding: 8px 12px; font-size: 11px; color: var(--gray-600);">
+                    <span><i class="fas fa-scale-balanced"></i> عجلة الجاذبية: <strong>g = 9.81 m/s²</strong></span>
+                    <span><i class="fas fa-droplet"></i> كثافة المياه: <strong>ρ = 1000 kg/m³</strong></span>
+                </div>
+
+                <!-- Calculated Head & Pressure Loss Results -->
+                <div style="margin-top: var(--spacing-2);">
+                    <div style="font-size: var(--font-size-xs); font-weight: 700; color: var(--gray-700); margin-bottom: 8px;">
+                        نتائج هبوط الضغط وفقد الطاقة الهيدروليكية:
+                    </div>
+                    <div class="results-metrics-grid">
+                        <div class="metric-box primary">
+                            <div class="metric-title">فقد الشحنة (Head Loss - hf)</div>
+                            <div class="metric-val" id="resHeadLoss">10.19 m</div>
+                            <div class="metric-sub">متر عمود مياه (m.w.c)</div>
+                        </div>
+                        <div class="metric-box primary">
+                            <div class="metric-title">هبوط الضغط (Pressure Loss)</div>
+                            <div class="metric-val" id="resPressurePa">100,000 Pa</div>
+                            <div class="metric-sub">باسكال (ΔP = ρ × g × hf)</div>
+                        </div>
+                        <div class="metric-box gold">
+                            <div class="metric-title">هبوط الضغط (kPa)</div>
+                            <div class="metric-val" id="resPressureKpa">100.0 kPa</div>
+                            <div class="metric-sub">كيلو باسكال (Pa / 1000)</div>
+                        </div>
+                        <div class="metric-box green">
+                            <div class="metric-title">هبوط الضغط (bar)</div>
+                            <div class="metric-val" id="resPressureBar">1.00 bar</div>
+                            <div class="metric-sub">بار هيدروليكي (100 kPa = 1 bar)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hydraulic Slope Info -->
+                <div style="background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: var(--spacing-3) var(--spacing-4); display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: var(--font-size-xs); color: var(--gray-600);">
+                        الميل الهيدروليكي (Hydraulic Gradient S = hf / L):
+                    </span>
+                    <strong id="resLossPer100m" style="color: var(--gray-800); font-size: var(--font-size-sm); direction: ltr;">
+                        2.04 m/100m
+                    </strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Interactive Simulation Card -->
+        <div class="fluid-card fade-in" style="margin-bottom: var(--spacing-8);">
+            <div class="fluid-card-header">
+                <div>
+                    <h3>
+                        <i class="fas fa-cubes-stacked"></i>
+                        <span>محاكاة تدفق المياه التفاعلية (Interactive Fluid Simulation)</span>
+                    </h3>
+                    <p style="font-size: var(--font-size-xs); color: var(--gray-400); margin-top: 4px;">
+                        تمثيل بصري تفاعلي لسرعة التدفق وتأثير تغير قطر الماسورة على توزيع سرعات المائع ومستوى الفواقد.
+                    </p>
+                </div>
+                <div style="display: flex; align-items: center; gap: var(--spacing-3);">
+                    <button type="button" class="btn btn-sm btn-secondary" id="toggleSimBtn">
+                        <i class="fas fa-pause"></i>
+                        إيقاف مؤقت
+                    </button>
+                    <span class="status-badge active" style="font-size: 11px;">
+                        <i class="fas fa-circle" style="font-size: 7px; color: var(--success);"></i> محاكاة حية 60fps
+                    </span>
+                </div>
+            </div>
+
+            <!-- Simulation Canvas -->
+            <div style="background: #0A1628; border-radius: var(--radius-lg); overflow: hidden; position: relative; border: 1px solid #1E293B;">
+                <canvas id="simCanvas" style="width: 100%; height: 240px; display: block;"></canvas>
+            </div>
+
+            <!-- Live Status Readout Under Canvas -->
+            <div class="results-metrics-grid cols-4">
+                <div class="metric-box">
+                    <div class="metric-title">قطر الماسورة الحالي (D)</div>
+                    <div class="metric-val" id="simDiameterVal" style="font-size: 1.05rem;">200 mm (0.20 m)</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-title">سرعة التدفق الفعلية (V)</div>
+                    <div class="metric-val" id="simVelocityVal" style="font-size: 1.05rem;">2.00 m/s</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-title">مساحة المقطع الهيدروليكي (A)</div>
+                    <div class="metric-val" id="simAreaVal" style="font-size: 1.05rem;">0.0314 m²</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-title">معدل التدفق الإجمالي (Q)</div>
+                    <div class="metric-val" id="simFlowVal" style="font-size: 1.05rem; color: var(--primary-600);">62.8 L/s</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Flow Rate Chart Card: Pipe Diameter vs Flow Rate -->
+        <div class="fluid-card fade-in" style="margin-bottom: var(--spacing-8);">
+            <div class="fluid-card-header">
+                <div>
+                    <h3>
+                        <i class="fas fa-chart-line"></i>
+                        <span>منحنى العلاقة: قطر الماسورة مقابل معدل التدفق (Pipe Diameter vs Flow Rate)</span>
+                    </h3>
+                    <p style="font-size: var(--font-size-xs); color: var(--gray-400); margin-top: 4px;">
+                        يوضح كيف يتناسب معدل التدفق Q طردياً مع مربع القطر D² عند ثبات السرعة (Q ∝ D²).
+                    </p>
+                </div>
+                <!-- Dynamic Chart Controls -->
+                <div style="display: flex; align-items: center; gap: var(--spacing-3); flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 6px; font-size: var(--font-size-xs);">
+                        <label for="chartMinD" style="font-weight: 600; color: var(--gray-600);">أدنى قطر (m):</label>
+                        <input type="number" id="chartMinD" value="0.05" min="0.02" max="0.30" step="0.01" style="width: 65px; padding: 4px 6px; border: 1px solid var(--gray-300); border-radius: var(--radius-sm); font-size: 11px;">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px; font-size: var(--font-size-xs);">
+                        <label for="chartMaxD" style="font-weight: 600; color: var(--gray-600);">أقصى قطر (m):</label>
+                        <input type="number" id="chartMaxD" value="0.50" min="0.20" max="2.00" step="0.05" style="width: 65px; padding: 4px 6px; border: 1px solid var(--gray-300); border-radius: var(--radius-sm); font-size: 11px;">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px; font-size: var(--font-size-xs);">
+                        <label for="chartV" style="font-weight: 600; color: var(--gray-600);">السرعة V (m/s):</label>
+                        <input type="number" id="chartV" value="2.0" min="0.5" max="10.0" step="0.1" style="width: 65px; padding: 4px 6px; border: 1px solid var(--gray-300); border-radius: var(--radius-sm); font-size: 11px;">
+                    </div>
+                </div>
+            </div>
+
+            <div id="flowChartContainer" style="width: 100%; min-height: 320px; position: relative;">
+                <!-- Rendered dynamically by FluidMechanics via HTML5 Canvas -->
+            </div>
+            
+            <div style="display: flex; align-items: center; justify-content: space-between; font-size: var(--font-size-xs); color: var(--gray-500); border-top: 1px solid var(--gray-100); padding-top: var(--spacing-3);">
+                <span><i class="fas fa-circle" style="color: #2E86AB; font-size: 9px;"></i> منحنى التدفق النظري (Q = πD²V/4)</span>
+                <span><i class="fas fa-circle" style="color: #C9A227; font-size: 9px;"></i> النقطة التشغيلية الحالية للمحطة</span>
+            </div>
+        </div>
+
+        <!-- 5. Academic Theory Section -->
+        <div class="fluid-card fade-in">
+            <div class="fluid-card-header">
+                <div>
+                    <h3>
+                        <i class="fas fa-book-bookmark"></i>
+                        <span>الأسس والقوانين النظرية لميكانيكا الموائع (Fluid Mechanics Theory)</span>
+                    </h3>
+                    <p style="font-size: var(--font-size-xs); color: var(--gray-400); margin-top: 4px;">
+                        ملخص القوانين والمعادلات الهندسية المعتمدة في تصميم وحساب شبكات المياه ومحطات الرفع.
+                    </p>
+                </div>
+            </div>
+
+            <div class="theory-cards-grid">
+                <!-- Theory 1 -->
+                <div class="theory-card">
+                    <div class="theory-header">
+                        <div class="theory-icon"><i class="fas fa-circle-notch"></i></div>
+                        <div>
+                            <h4 style="font-size: var(--font-size-sm); font-weight: 700; color: var(--gray-900);">1. مساحة مقطع الماسورة</h4>
+                            <span style="font-size: 11px; color: var(--gray-400);">Cross-sectional Area</span>
+                        </div>
+                    </div>
+                    <div class="theory-formula-display">
+                        A = π · D² / 4
+                    </div>
+                    <p class="theory-text">
+                        مساحة المقطع العرضي الدائري للماسورة تتناسب طردياً مع <strong>مربع القطر (D²)</strong>، مما يعني أن مضاعفة القطر تزيد المساحة أربعة أضعاف.
+                    </p>
+                </div>
+
+                <!-- Theory 2 -->
+                <div class="theory-card">
+                    <div class="theory-header">
+                        <div class="theory-icon"><i class="fas fa-water"></i></div>
+                        <div>
+                            <h4 style="font-size: var(--font-size-sm); font-weight: 700; color: var(--gray-900);">2. معادلة الاستمرارية والتدفق</h4>
+                            <span style="font-size: 11px; color: var(--gray-400);">Continuity & Flow Rate</span>
+                        </div>
+                    </div>
+                    <div class="theory-formula-display">
+                        Q = A · V
+                    </div>
+                    <p class="theory-text">
+                        معدل التدفق الحجمي (Q) يساوي حاصل ضرب مساحة المقطع (A) في متوسط سرعة تدفق المياه (V). عند ثبات القطر، يتناسب التدفق طردياً مع السرعة.
+                    </p>
+                </div>
+
+                <!-- Theory 3 -->
+                <div class="theory-card">
+                    <div class="theory-header">
+                        <div class="theory-icon"><i class="fas fa-calculator"></i></div>
+                        <div>
+                            <h4 style="font-size: var(--font-size-sm); font-weight: 700; color: var(--gray-900);">3. معادلة دارسي-فايسباخ</h4>
+                            <span style="font-size: 11px; color: var(--gray-400);">Darcy-Weisbach Equation</span>
+                        </div>
+                    </div>
+                    <div class="theory-formula-display">
+                        hf = f · (L / D) · (V² / 2g)
+                    </div>
+                    <p class="theory-text">
+                        تحدد الفقد في طاقة الشحنة الهيدروليكية الناتج عن الاحتكاك مع جدران الماسورة، ويتناسب الفقد طردياً مع مربع السرعة (V²) وطول الماسورة (L) وعكسياً مع القطر (D).
+                    </p>
+                </div>
+
+                <!-- Theory 4 -->
+                <div class="theory-card">
+                    <div class="theory-header">
+                        <div class="theory-icon"><i class="fas fa-gauge-high"></i></div>
+                        <div>
+                            <h4 style="font-size: var(--font-size-sm); font-weight: 700; color: var(--gray-900);">4. هبوط الضغط الهيدروليكي</h4>
+                            <span style="font-size: 11px; color: var(--gray-400);">Pressure Loss Relation</span>
+                        </div>
+                    </div>
+                    <div class="theory-formula-display">
+                        ΔP = ρ · g · hf
+                    </div>
+                    <p class="theory-text">
+                        يعبر عن هبوط الضغط بوحدات الباسكال أو البار الناتج عن فقد الشحنة hf، حيث ρ كثافة السائل (1000 كجم/م³ للماء) و g عجلة الجاذبية (9.81 م/ث²).
+                    </p>
+                </div>
+
+                <!-- Theory 5 -->
+                <div class="theory-card">
+                    <div class="theory-header">
+                        <div class="theory-icon"><i class="fas fa-wind"></i></div>
+                        <div>
+                            <h4 style="font-size: var(--font-size-sm); font-weight: 700; color: var(--gray-900);">5. رقم رينولدز ونظام الجريان</h4>
+                            <span style="font-size: 11px; color: var(--gray-400);">Reynolds Number & Regime</span>
+                        </div>
+                    </div>
+                    <div class="theory-formula-display">
+                        Re = (V · D) / ν
+                    </div>
+                    <p class="theory-text">
+                        رقم لابُعدي يحدد طبيعة الجريان؛ هادئ (Re &lt; 2300) أو انتقالي أو مضطرب (Re &gt; 4000). في شبكات مياه الشرب يكون الجريان غالباً مضطرباً تماماً.
+                    </p>
+                </div>
+
+                <!-- Theory 6 -->
+                <div class="theory-card">
+                    <div class="theory-header">
+                        <div class="theory-icon"><i class="fas fa-table-cells"></i></div>
+                        <div>
+                            <h4 style="font-size: var(--font-size-sm); font-weight: 700; color: var(--gray-900);">6. تحويلات الوحدات الهندسية</h4>
+                            <span style="font-size: 11px; color: var(--gray-400);">Units Conversion</span>
+                        </div>
+                    </div>
+                    <div class="theory-formula-display" style="font-size: 1.05rem;">
+                        1 m³/s = 1,000 L/s = 60,000 L/min
+                    </div>
+                    <p class="theory-text">
+                        1 بار (bar) = 100 كيلو باسكال (kPa) = 100,000 باسكال (Pa).<br>
+                        1 متر عمود مياه (m.w.c) ≈ 0.0981 بار ≈ 9.81 كيلو باسكال.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/fluid-mechanics.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Auth.initDashboard();
+            FluidMechanics.init();
+        });
+    </script>
+</body>
+</html>
