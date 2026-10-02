@@ -472,6 +472,26 @@
                 <div id="modalSensorContent"></div>
             </div>
         </div>
+
+        <!-- Delete Station Modal -->
+        <div class="modal-overlay" id="deleteStationModal">
+            <div class="modal-content" style="max-width: 440px; text-align: center;">
+                <div style="width: 60px; height: 60px; border-radius: 50%; background: var(--danger-light); color: var(--danger); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto var(--spacing-4);">
+                    <i class="fas fa-trash-alt"></i>
+                </div>
+                <h3 style="font-size: var(--font-size-lg); font-weight: 700; color: var(--gray-900); margin-bottom: var(--spacing-2);">تأكيد حذف المحطة</h3>
+                <p style="color: var(--gray-600); font-size: var(--font-size-sm); margin-bottom: var(--spacing-6);">
+                    هل أنت متأكد من رغبتك في حذف محطة <strong id="deleteStationName" style="color: var(--danger);"></strong>؟ هذا الإجراء لا يمكن التراجع عنه.
+                </p>
+                <div style="display: flex; gap: var(--spacing-3); justify-content: center;">
+                    <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">إلغاء</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                        <i class="fas fa-trash-alt"></i>
+                        نعم، احذف المحطة
+                    </button>
+                </div>
+            </div>
+        </div>
     </main>
 
     <script src="js/data.js"></script>
@@ -492,18 +512,23 @@
             const addBtn = document.getElementById('addStationBtn');
 
             // Show button only for admin
-            if (user && user.role === 'admin') {
+            if (user && user.role === 'admin' && addBtn) {
                 addBtn.style.display = 'flex';
             }
 
             // Open modal on button click
-            addBtn.addEventListener('click', openAddStationModal);
+            if (addBtn) {
+                addBtn.addEventListener('click', openAddStationModal);
+            }
 
             // Populate governorate dropdown
             populateGovernorateSelect();
 
             // Form submission
-            document.getElementById('addStationForm').addEventListener('submit', handleAddStation);
+            const addForm = document.getElementById('addStationForm');
+            if (addForm) {
+                addForm.addEventListener('submit', handleAddStation);
+            }
 
             // Setup delete buttons visibility
             setupDeleteButtons();
@@ -727,8 +752,8 @@
                 renderStationsTable(filtered);
             }
 
-            searchInput.addEventListener('input', applyFilters);
-            statusFilter.addEventListener('change', applyFilters);
+            if (searchInput) searchInput.addEventListener('input', applyFilters);
+            if (statusFilter) statusFilter.addEventListener('change', applyFilters);
         }
 
         function showSensorDetails(stationId) {
@@ -872,18 +897,32 @@
         }
 
         // Setup delete confirmation button
-        document.getElementById('confirmDeleteBtn').addEventListener('click', handleDeleteStation);
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        if (confirmDeleteBtn) {
+            confirmDeleteBtn.addEventListener('click', handleDeleteStation);
+        }
 
         // Close modal on backdrop click
-        document.getElementById('sensorModal').addEventListener('click', function(e) {
-            if (e.target === this) closeSensorModal();
-        });
-        document.getElementById('addStationModal').addEventListener('click', function(e) {
-            if (e.target === this) closeAddStationModal();
-        });
-        document.getElementById('deleteStationModal').addEventListener('click', function(e) {
-            if (e.target === this) closeDeleteModal();
-        });
+        const sensorModal = document.getElementById('sensorModal');
+        if (sensorModal) {
+            sensorModal.addEventListener('click', function(e) {
+                if (e.target === this) closeSensorModal();
+            });
+        }
+
+        const addStationModal = document.getElementById('addStationModal');
+        if (addStationModal) {
+            addStationModal.addEventListener('click', function(e) {
+                if (e.target === this) closeAddStationModal();
+            });
+        }
+
+        const deleteStationModal = document.getElementById('deleteStationModal');
+        if (deleteStationModal) {
+            deleteStationModal.addEventListener('click', function(e) {
+                if (e.target === this) closeDeleteModal();
+            });
+        }
     </script>
 </body>
 </html>

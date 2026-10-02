@@ -156,12 +156,15 @@
             renderReportStats();
             renderReportTable();
 
-            document.getElementById('exportBtn').addEventListener('click', function() {
-                Auth.showToast('جاري التصدير', 'جاري إعداد التقرير للتصدير...', 'info');
-                setTimeout(() => {
-                    Auth.showToast('تم التصدير', 'تم تصدير التقرير بنجاح', 'success');
-                }, 2000);
-            });
+            const exportBtn = document.getElementById('exportBtn');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', function() {
+                    Auth.showToast('جاري التصدير', 'جاري إعداد التقرير للتصدير...', 'info');
+                    setTimeout(() => {
+                        Auth.showToast('تم التصدير', 'تم تصدير التقرير بنجاح', 'success');
+                    }, 2000);
+                });
+            }
         });
 
         function renderMonthlyChart() {

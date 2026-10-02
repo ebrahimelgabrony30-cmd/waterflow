@@ -13,6 +13,8 @@ const Auth = (function() {
     // Initialize login page
     function initLogin() {
         const loginForm = document.getElementById('loginForm');
+        if (!loginForm) return;
+
         const governorateSelect = document.getElementById('governorate');
         const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
@@ -26,7 +28,9 @@ const Auth = (function() {
         let currentUserType = 'governorate';
 
         // Populate governorate dropdown
-        populateGovernorateDropdown();
+        if (governorateSelect) {
+            populateGovernorateDropdown();
+        }
 
         // User type toggle
         typeBtns.forEach(btn => {
@@ -39,21 +43,28 @@ const Auth = (function() {
         });
 
         // Governorate change
-        governorateSelect.addEventListener('change', function() {
-            const selectedGov = WaterGuardData.governorates.find(g => g.id === this.value);
-            if (selectedGov) {
-                usernameInput.value = selectedGov.id;
-                showGovernorateLogo(selectedGov);
-            }
-        });
+        if (governorateSelect) {
+            governorateSelect.addEventListener('change', function() {
+                const selectedGov = WaterGuardData.governorates.find(g => g.id === this.value);
+                if (selectedGov) {
+                    if (usernameInput) usernameInput.value = selectedGov.id;
+                    showGovernorateLogo(selectedGov);
+                }
+            });
+        }
 
         // Toggle password
-        togglePassword.addEventListener('click', () => {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            togglePassword.querySelector('i').classList.toggle('fa-eye');
-            togglePassword.querySelector('i').classList.toggle('fa-eye-slash');
-        });
+        if (togglePassword && passwordInput) {
+            togglePassword.addEventListener('click', () => {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                const icon = togglePassword.querySelector('i');
+                if (icon) {
+                    icon.classList.toggle('fa-eye');
+                    icon.classList.toggle('fa-eye-slash');
+                }
+            });
+        }
 
         // Form submission
         loginForm.addEventListener('submit', handleLogin);

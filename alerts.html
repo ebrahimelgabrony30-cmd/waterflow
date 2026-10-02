@@ -128,12 +128,15 @@
             loadAlerts();
             setupAlertFilters();
 
-            document.getElementById('markAllRead').addEventListener('click', function() {
-                document.querySelectorAll('.alert-card').forEach(card => {
-                    card.style.opacity = '0.6';
+            const markAllRead = document.getElementById('markAllRead');
+            if (markAllRead) {
+                markAllRead.addEventListener('click', function() {
+                    document.querySelectorAll('.alert-card').forEach(card => {
+                        card.style.opacity = '0.6';
+                    });
+                    Auth.showToast('تم', 'تم تحديد جميع التنبيهات كمقروءة', 'success');
                 });
-                Auth.showToast('تم', 'تم تحديد جميع التنبيهات كمقروءة', 'success');
-            });
+            }
         });
 
         function loadAlerts() {

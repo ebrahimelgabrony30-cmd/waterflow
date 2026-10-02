@@ -360,17 +360,26 @@
             setupSettingsNav();
 
             // Save buttons
-            document.getElementById('saveThresholds').addEventListener('click', () => {
-                Auth.showToast('تم الحفظ', 'تم حفظ إعدادات حدود المؤشرات بنجاح', 'success');
-            });
+            const saveThresholdsBtn = document.getElementById('saveThresholds');
+            if (saveThresholdsBtn) {
+                saveThresholdsBtn.addEventListener('click', () => {
+                    Auth.showToast('تم الحفظ', 'تم حفظ إعدادات حدود المؤشرات بنجاح', 'success');
+                });
+            }
 
-            document.getElementById('saveSystem').addEventListener('click', () => {
-                Auth.showToast('تم الحفظ', 'تم حفظ إعدادات النظام بنجاح', 'success');
-            });
+            const saveSystemBtn = document.getElementById('saveSystem');
+            if (saveSystemBtn) {
+                saveSystemBtn.addEventListener('click', () => {
+                    Auth.showToast('تم الحفظ', 'تم حفظ إعدادات النظام بنجاح', 'success');
+                });
+            }
 
-            document.getElementById('changePassword').addEventListener('click', () => {
-                Auth.showToast('تم التغيير', 'تم تغيير كلمة المرور بنجاح', 'success');
-            });
+            const changePasswordBtn = document.getElementById('changePassword');
+            if (changePasswordBtn) {
+                changePasswordBtn.addEventListener('click', () => {
+                    Auth.showToast('تم التغيير', 'تم تغيير كلمة المرور بنجاح', 'success');
+                });
+            }
         });
 
         function loadUserInfo() {
